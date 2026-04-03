@@ -1,0 +1,16 @@
+{
+  "name": "own-chatbot-agent",
+  "version": "0.1.0",
+  "description": "Generalized AI chatbot builder that creates personalized chatbot profiles for different websites and businesses.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "cli": "node src/cli.js"
+  },
+  "dependencies": {
+    "puppeteer": "^24.40.0"
+  },
+  "license": "MIT"
+}
