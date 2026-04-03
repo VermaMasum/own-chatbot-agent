@@ -12,8 +12,46 @@ const submitButton = form.querySelector('button[type="submit"]');
 let currentProfile = null;
 let conversation = [];
 
-const templatesResponse = await fetch("/api/templates");
-const templatesData = await templatesResponse.json();
+const localTemplates = {
+  real_estate: {
+    label: "Real Estate",
+    tone: "professional, helpful, and conversion-focused",
+    goals: ["capture leads", "answer property questions", "book viewings"],
+    knowledgeHints: ["property listings", "pricing", "loan guidance", "contact details"]
+  },
+  ecommerce: {
+    label: "Ecommerce",
+    tone: "friendly, concise, and sales-oriented",
+    goals: ["answer product questions", "recommend products", "reduce support load"],
+    knowledgeHints: ["product catalog", "shipping policy", "return policy", "promotions"]
+  },
+  clinic: {
+    label: "Clinic / Healthcare",
+    tone: "calm, professional, and reassuring",
+    goals: ["book appointments", "answer service questions", "share clinic details"],
+    knowledgeHints: ["services", "pricing", "timings", "doctor profiles"]
+  },
+  saas: {
+    label: "SaaS",
+    tone: "clear, technical, and support-friendly",
+    goals: ["qualify leads", "answer product questions", "support onboarding"],
+    knowledgeHints: ["pricing", "features", "documentation", "onboarding"]
+  },
+  restaurant: {
+    label: "Restaurant",
+    tone: "warm, quick, and welcoming",
+    goals: ["share menu", "take reservations", "answer timing questions"],
+    knowledgeHints: ["menu", "hours", "location", "delivery policy"]
+  },
+  generic: {
+    label: "General Business",
+    tone: "helpful, friendly, and adaptable",
+    goals: ["answer website questions", "capture leads", "route complex issues"],
+    knowledgeHints: ["about page", "FAQ", "contact details", "policies"]
+  }
+};
+
+const templatesData = await loadTemplates();
 
 businessType.innerHTML = templatesData.templates
   .map((item, index) => `<option value="${item.key}" ${index === 0 ? "selected" : ""}>${item.label}</option>`)
@@ -69,17 +107,20 @@ chatForm.addEventListener("submit", async (event) => {
   const typingId = addTyping();
 
   try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message,
-        profile: currentProfile,
-        conversation
-      })
-    });
+    const data =
+      (await callApi("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message,
+          profile: currentProfile,
+          conversation
+        })
+      })) || {
+        reply: generateLocalReply(message, currentProfile, conversation),
+        provider: "static"
+      };
 
-    const data = await response.json();
     removeTyping(typingId);
 
     const reply = data.reply || "I could not generate a response right now.";
@@ -121,26 +162,24 @@ async function refreshProfile(isInitial = false) {
   simMeta.textContent = "Reading website and generating profile...";
 
   try {
-    const response = await fetch("/api/build", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await response.json();
-    if (!response.ok || data.error) {
-      throw new Error(data.error || `Profile build failed with status ${response.status}`);
-    }
+    const data =
+      (await callApi("/api/build", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })) || buildLocalProfile(payload);
 
     if (!Array.isArray(data.websiteChunks) || data.websiteChunks.length === 0) {
-      simMeta.textContent = `${data.businessType} | ${data.tone} | no readable website content found`;
+      simMeta.textContent = `${data.businessType} | ${data.tone} | ${
+        data.provider === "static" ? "demo mode" : "no readable website content found"
+      }`;
     }
 
     currentProfile = data;
     output.textContent = JSON.stringify(currentProfile, null, 2);
 
     simName.textContent = currentProfile.projectName || "Website Assistant";
-    simMeta.textContent = `${currentProfile.businessType} | ${currentProfile.tone}`;
+    simMeta.textContent = `${currentProfile.businessType} | ${currentProfile.tone}${currentProfile.provider === "static" ? " | demo mode" : ""}`;
 
     conversation = [];
     renderIntro(isInitial);
@@ -215,15 +254,149 @@ function removeTyping(id) {
 }
 
 function escapeHtml(value) {
-  return value.replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
+  return value.replace(/[&<>"']/g, (char) =>
+    ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]
+  );
 }
 
 function scrollChatToBottom() {
   chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+async function loadTemplates() {
+  try {
+    const response = await fetch("./api/templates");
+    if (!response.ok) throw new Error("Template endpoint unavailable");
+    return await response.json();
+  } catch {
+    return {
+      templates: Object.entries(localTemplates).map(([key, value]) => ({
+        key,
+        label: value.label
+      }))
+    };
+  }
+}
+
+async function callApi(path, options) {
+  try {
+    const response = await fetch(path, options);
+    const data = await response.json();
+    if (!response.ok || data?.error) {
+      throw new Error(data?.error || `Request failed with status ${response.status}`);
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function buildLocalProfile(payload) {
+  const template = localTemplates[payload.businessType] || localTemplates.generic;
+  const projectName = payload.projectName || `${template.label} Chatbot`;
+  const goals = compact([payload.mainGoal, ...template.goals]);
+  const knowledgeSources = compact([
+    payload.websiteUrl && `Website: ${payload.websiteUrl}`,
+    payload.websiteTitle && `Website title: ${payload.websiteTitle}`,
+    payload.websiteSummary && `Website summary: ${payload.websiteSummary}`,
+    payload.uploadedDocs && `Uploaded docs: ${payload.uploadedDocs}`,
+    ...template.knowledgeHints.map((hint) => `Business knowledge: ${hint}`)
+  ]);
+  const leadCaptureFields = compact([
+    payload.capturesName === "yes" && "name",
+    payload.capturesEmail === "yes" && "email",
+    payload.capturesPhone === "yes" && "phone"
+  ]);
+  const handoffConditions = compact([
+    payload.handoffReason || "The user asks for something outside the knowledge base.",
+    "The user requests a human representative.",
+    "The bot is uncertain about the answer."
+  ]);
+
+  return {
+    projectName,
+    businessType: template.label,
+    websiteUrl: payload.websiteUrl || "",
+    websiteTitle: payload.websiteTitle || "",
+    websiteSummary: payload.websiteSummary || "",
+    websitePages: [],
+    websiteSections: [],
+    websiteChunks: [],
+    websiteTopics: [],
+    tone: payload.tone || template.tone,
+    goals,
+    targetAudience: payload.targetAudience || "website visitors",
+    knowledgeSources,
+    leadCaptureFields,
+    handoffConditions,
+    allowedTopics: compact([
+      payload.allowedTopics,
+      "business services",
+      "pricing or packages",
+      "basic support"
+    ]),
+    blockedTopics: compact([
+      payload.blockedTopics,
+      "legal advice",
+      "medical diagnosis",
+      "financial guarantees"
+    ]),
+    prompt: buildLocalPrompt({
+      projectName,
+      businessType: template.label,
+      tone: payload.tone || template.tone,
+      goals,
+      knowledgeSources,
+      handoffConditions,
+      leadFields: leadCaptureFields
+    }),
+    provider: "static"
+  };
+}
+
+function buildLocalPrompt(profile) {
+  return [
+    `You are the AI chatbot for ${profile.projectName}.`,
+    `Business type: ${profile.businessType}.`,
+    `Tone: ${profile.tone}.`,
+    `Primary goals: ${profile.goals.join(", ")}.`,
+    `Knowledge sources: ${profile.knowledgeSources.join(", ")}.`,
+    `Capture lead fields only when useful: ${profile.leadFields.join(", ") || "none"}.`,
+    `Hand off to a human when: ${profile.handoffConditions.join(" | ")}.`,
+    "Be accurate, concise, and friendly.",
+    "If a question cannot be answered confidently, say so and offer a handoff.",
+    "Adapt the reply to the user's intent instead of sounding generic."
+  ].join("\n");
+}
+
+function generateLocalReply(message, profile, history) {
+  const text = String(message || "").toLowerCase();
+  const name = profile?.projectName || "this chatbot";
+
+  if (text.includes("price") || text.includes("pricing")) {
+    return `${name} can help with pricing guidance, but exact numbers depend on the business setup.`;
+  }
+
+  if (text.includes("hello") || text.includes("hi")) {
+    return `Hi, I’m ${name}. How can I help today?`;
+  }
+
+  if (text.includes("contact") || text.includes("email") || text.includes("phone")) {
+    return `I can help route you to the right contact details for ${profile?.businessType || "this business"}.`;
+  }
+
+  const lastUserMessage = [...history].reverse().find((item) => item.role === "user")?.content;
+  return `I’m in demo mode right now, so I can simulate helpful replies for ${
+    profile?.businessType || "this business"
+  }. Ask me about ${profile?.goals?.[0] || "services"} or "${lastUserMessage || "your question"}".`;
+}
+
+function compact(values) {
+  return [...new Set(values.flat ? values.flat().filter(Boolean) : values.filter(Boolean))];
 }
