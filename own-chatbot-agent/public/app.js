@@ -71,14 +71,26 @@ const localTemplates = {
   }
 };
 
-// Safe initialization
+// Populate dropdown with local data immediately
+if (businessType) {
+  const initialTemplates = Object.entries(localTemplates).map(([key, value]) => ({
+    key,
+    label: value.label
+  }));
+  businessType.innerHTML = initialTemplates
+    .map((item, index) => `<option value="${item.key}" ${index === 0 ? "selected" : ""}>${item.label}</option>`)
+    .join("");
+  syncQuickActions(businessType.value);
+}
+
+// Safe background initialization to sync with backend
 (async function init() {
   const templatesData = await loadTemplates();
-  if (businessType) {
+  if (businessType && templatesData.templates.length > 0) {
+    const currentVal = businessType.value;
     businessType.innerHTML = templatesData.templates
-      .map((item, index) => `<option value="${item.key}" ${index === 0 ? "selected" : ""}>${item.label}</option>`)
+      .map((item) => `<option value="${item.key}" ${item.key === currentVal ? "selected" : ""}>${item.label}</option>`)
       .join("");
-    syncQuickActions(businessType.value);
   }
   await refreshProfile(true);
 })();
