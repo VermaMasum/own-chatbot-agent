@@ -7,9 +7,12 @@ const chatInput = document.getElementById("chatInput");
 const quickActions = document.getElementById("quickActions");
 const simName = document.getElementById("simName");
 const simMeta = document.getElementById("simMeta");
+const publishButton = document.getElementById("publishButton");
+const publishOutput = document.getElementById("publishOutput");
 const submitButton = form.querySelector('button[type="submit"]');
 
 let currentProfile = null;
+let currentBot = null;
 let conversation = [];
 
 const localTemplates = {
@@ -95,6 +98,50 @@ form.addEventListener("submit", async (event) => {
   await refreshProfile();
 });
 
+if (publishButton) {
+  publishButton.addEventListener("click", async () => {
+    if (!currentProfile) return;
+
+    publishButton.disabled = true;
+    publishButton.textContent = currentBot ? "Updating chatbot..." : "Publishing chatbot...";
+    publishOutput.textContent = "Publishing your chatbot...";
+
+    try {
+      const data = await callApi("/api/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profile: currentProfile,
+          botId: currentBot?.id
+        })
+      });
+
+      if (!data) {
+        throw new Error("Publish request failed");
+      }
+
+      currentBot = data;
+      currentProfile = {
+        ...currentProfile,
+        botId: data.id,
+        publishUrl: data.publicUrl,
+        embedUrl: data.embedUrl
+      };
+
+      if (output) {
+        output.textContent = JSON.stringify(currentProfile, null, 2);
+      }
+
+      renderPublishOutput(data);
+    } catch (error) {
+      publishOutput.textContent = `Could not publish chatbot: ${error.message}`;
+    } finally {
+      publishButton.disabled = false;
+      publishButton.textContent = currentBot ? "Update chatbot" : "Publish chatbot";
+    }
+  });
+}
+
 chatForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const message = chatInput.value.trim();
@@ -166,7 +213,10 @@ async function refreshProfile(isInitial = false) {
       (await callApi("/api/build", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          ...payload,
+          forceRefresh: true
+        })
       })) || buildLocalProfile(payload);
 
     if (!Array.isArray(data.websiteChunks) || data.websiteChunks.length === 0) {
@@ -176,6 +226,7 @@ async function refreshProfile(isInitial = false) {
     }
 
     currentProfile = data;
+    currentBot = null;
     output.textContent = JSON.stringify(currentProfile, null, 2);
 
     simName.textContent = currentProfile.projectName || "Website Assistant";
@@ -184,13 +235,20 @@ async function refreshProfile(isInitial = false) {
     conversation = [];
     renderIntro(isInitial);
     syncQuickActions(payload.businessType);
+    renderPublishPrompt();
   } catch (error) {
     currentProfile = null;
+    currentBot = null;
     output.textContent = `Could not generate chatbot profile.\n\n${error.message}`;
     simMeta.textContent = "Could not read the website";
+    renderPublishPrompt(error.message);
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = "Generate chatbot profile";
+    if (publishButton) {
+      publishButton.disabled = !currentProfile;
+      publishButton.textContent = "Publish chatbot";
+    }
   }
 }
 
@@ -217,6 +275,36 @@ function syncQuickActions(type) {
   quickActions.innerHTML = prompts
     .map((prompt) => `<button type="button" data-prompt="${escapeHtml(prompt)}">${escapeHtml(prompt)}</button>`)
     .join("");
+}
+
+function renderPublishPrompt(message = "") {
+  if (!publishOutput) return;
+  publishOutput.textContent = message
+    ? `Publish is ready once the profile loads. ${message}`
+    : "Generate a chatbot profile first, then publish it to get a live URL and install snippet.";
+}
+
+function renderPublishOutput(bot) {
+  if (!publishOutput) return;
+
+  const shareUrl = bot.publicUrl || bot.shareUrl || "";
+  const embedScript = bot.embedScript || "";
+  const embedIframe = bot.embedIframe || "";
+
+  publishOutput.innerHTML = `
+    <div class="publish-summary">
+      <div><strong>Bot ID:</strong> <code>${escapeHtml(bot.id || "")}</code></div>
+      <div><strong>Share URL:</strong> <a href="${escapeHtml(shareUrl)}" target="_blank" rel="noreferrer">${escapeHtml(shareUrl)}</a></div>
+    </div>
+    <label class="snippet-label">
+      Embed script
+      <textarea readonly rows="3">${escapeHtml(embedScript)}</textarea>
+    </label>
+    <label class="snippet-label">
+      Embed iframe
+      <textarea readonly rows="4">${escapeHtml(embedIframe)}</textarea>
+    </label>
+  `;
 }
 
 function addMessage(role, text) {
@@ -254,7 +342,7 @@ function removeTyping(id) {
 }
 
 function escapeHtml(value) {
-  return value.replace(/[&<>"']/g, (char) =>
+  return String(value || "").replace(/[&<>"']/g, (char) =>
     ({
       "&": "&amp;",
       "<": "&lt;",

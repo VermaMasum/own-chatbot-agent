@@ -1,0 +1,133 @@
+{
+  "info": {
+    "_postman_id": "7e1d2c7c-2a0a-4b62-9b7b-3d1e4d5b9b11",
+    "name": "Own Chatbot Agent",
+    "description": "Postman collection for the Own Chatbot Agent backend API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Templates",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/templates",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "templates"]
+        }
+      }
+    },
+    {
+      "name": "Build Chatbot Profile",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessType\": \"saas\",\n  \"projectName\": \"Acme Support Bot\",\n  \"websiteUrl\": \"https://example.com\",\n  \"mainGoal\": \"answer product questions and collect leads\",\n  \"targetAudience\": \"website visitors\",\n  \"tone\": \"clear, technical, and support-friendly\",\n  \"capturesName\": \"yes\",\n  \"capturesEmail\": \"yes\",\n  \"capturesPhone\": \"no\",\n  \"uploadedDocs\": \"website pages, FAQ, pricing, docs\",\n  \"allowedTopics\": \"pricing, features, onboarding, support\",\n  \"blockedTopics\": \"legal advice, medical diagnosis, financial guarantees\",\n  \"handoffReason\": \"when the bot is uncertain or the user requests a human\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/build",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "build"]
+        }
+      }
+    },
+    {
+      "name": "Publish Chatbot",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"profile\": {\n    \"projectName\": \"Acme Support Bot\",\n    \"businessType\": \"SaaS\",\n    \"websiteUrl\": \"https://example.com\",\n    \"websiteTitle\": \"Example\",\n    \"websiteSummary\": \"Example summary\",\n    \"websitePages\": [],\n    \"websiteSections\": [],\n    \"websiteChunks\": [],\n    \"websiteTopics\": [],\n    \"tone\": \"clear, technical, and support-friendly\",\n    \"goals\": [\"answer product questions\", \"qualify leads\", \"support onboarding\"],\n    \"targetAudience\": \"website visitors\",\n    \"knowledgeSources\": [\"Website: https://example.com\"],\n    \"leadCaptureFields\": [\"name\", \"email\"],\n    \"handoffConditions\": [\"The bot is uncertain about the answer.\"],\n    \"allowedTopics\": [\"pricing\", \"features\", \"support\"],\n    \"blockedTopics\": [\"legal advice\", \"medical diagnosis\"],\n    \"prompt\": \"You are the AI chatbot for Acme Support Bot.\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/publish",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "publish"]
+        }
+      }
+    },
+    {
+      "name": "List Bots",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/bots",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "bots"]
+        }
+      }
+    },
+    {
+      "name": "Get Bot By Id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/bots/{{botId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "bots", "{{botId}}"]
+        }
+      }
+    },
+    {
+      "name": "Chat With Bot",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"botId\": \"{{botId}}\",\n  \"message\": \"What plans do you offer?\",\n  \"conversation\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Hi\"\n    },\n    {\n      \"role\": \"assistant\",\n      \"content\": \"Hello! How can I help?\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat"]
+        }
+      }
+    },
+    {
+      "name": "Get Embed Script",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/embed/{{botId}}.js",
+          "host": ["{{baseUrl}}"],
+          "path": ["embed", "{{botId}}.js"]
+        }
+      }
+    },
+    {
+      "name": "Open Public Bot Page",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/bot/{{botId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["bot", "{{botId}}"]
+        }
+      }
+    }
+  ]
+}

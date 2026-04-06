@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildChatbotProfile } from "./builder.js";
+import { getBot as dbGetBot, listBots as dbListBots, saveBot as dbSaveBot, saveChatExchange, saveCrawlRun } from "./db.js";
 import { listTemplates } from "./templates.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,7 +29,20 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && url.pathname === "/api/build") {
       const body = await readJsonBody(req);
-      const websiteContext = await getWebsiteContext(body.websiteUrl);
+      let websiteContext = await getWebsiteContext(body.websiteUrl, body.forceRefresh);
+      if (!isValidWebsiteContext(websiteContext)) {
+        websiteContext = await getSimpleWebsiteContext(body.websiteUrl);
+      }
+      await saveCrawlRun({
+        websiteUrl: body.websiteUrl || "",
+        title: websiteContext.title || "",
+        summary: websiteContext.summary || "",
+        pages: websiteContext.pages || [],
+        sections: websiteContext.sections || [],
+        chunks: websiteContext.chunks || [],
+        topics: websiteContext.topics || [],
+        source: isValidWebsiteContext(websiteContext) ? "crawl" : "fallback"
+      });
       const profile = buildChatbotProfile({
         ...body,
         websiteTitle: websiteContext.title,
@@ -41,9 +55,52 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, profile);
     }
 
+    if (req.method === "POST" && url.pathname === "/api/publish") {
+      const body = await readJsonBody(req);
+      const profile = body?.profile && typeof body.profile === "object" ? body.profile : body;
+      const savedBot = await saveBot(profile, body?.botId || body?.id);
+      return sendJson(res, 200, formatBotResponse(savedBot, req));
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/bots") {
+      const bots = await listBots();
+      return sendJson(res, 200, {
+        bots: bots.map((bot) => formatBotSummary(bot, req))
+      });
+    }
+
+    const botRouteMatch = url.pathname.match(/^\/api\/bots\/([^/]+)$/);
+    if (req.method === "GET" && botRouteMatch) {
+      const bot = await getBot(botRouteMatch[1]);
+      if (!bot) {
+        return sendJson(res, 404, { error: "Bot not found" });
+      }
+      return sendJson(res, 200, formatBotResponse(bot, req));
+    }
+
+    const embedRouteMatch = url.pathname.match(/^\/embed\/([^/]+)\.js$/);
+    if (req.method === "GET" && embedRouteMatch) {
+      const bot = await getBot(embedRouteMatch[1]);
+      if (!bot) {
+        return sendText(res, 404, "Bot not found");
+      }
+      return sendEmbedScript(res, bot, req);
+    }
+
+    if (req.method === "GET" && /^\/bot\/[^/]+$/.test(url.pathname)) {
+      return serveBotPage(res);
+    }
+
     if (req.method === "POST" && url.pathname === "/api/chat") {
       const body = await readJsonBody(req);
       const reply = await generateChatReply(body);
+      await saveChatExchange({
+        botId: String(body.botId || body?.profile?.botId || "").trim(),
+        sessionId: String(body.sessionId || body.conversationId || "").trim(),
+        userMessage: body.message || "",
+        assistantReply: reply.reply || "",
+        provider: reply.provider || "fallback"
+      });
       return sendJson(res, 200, reply);
     }
 
@@ -110,6 +167,91 @@ async function readJsonBody(req) {
   return text ? JSON.parse(text) : {};
 }
 
+async function saveBot(profile, botId) {
+  return dbSaveBot(profile, botId);
+}
+
+async function listBots() {
+  return dbListBots();
+}
+
+async function getBot(botId) {
+  return dbGetBot(botId);
+}
+
+function formatBotSummary(bot, req) {
+  const urls = buildBotUrls(bot.id, req);
+  return {
+    id: bot.id,
+    projectName: bot.profile?.projectName || "Untitled chatbot",
+    businessType: bot.profile?.businessType || "General Business",
+    createdAt: bot.createdAt,
+    updatedAt: bot.updatedAt,
+    publicUrl: urls.publicUrl,
+    embedUrl: urls.embedUrl
+  };
+}
+
+function formatBotResponse(bot, req) {
+  const urls = buildBotUrls(bot.id, req);
+  return {
+    ...bot,
+    ...urls,
+    embedScript: `<script src="${urls.embedUrl}" data-bot-id="${bot.id}" async></script>`,
+    embedIframe: `<iframe src="${urls.publicUrl}?embed=1" title="${escapeAttribute(bot.profile?.projectName || "Chatbot")}" style="border:0;width:100%;max-width:420px;height:620px;border-radius:24px;overflow:hidden;"></iframe>`
+  };
+}
+
+function buildBotUrls(botId, req) {
+  const host = req.headers.host || `localhost:${port}`;
+  const protocol = String(req.headers["x-forwarded-proto"] || "http").split(",")[0].trim() || "http";
+  const origin = `${protocol}://${host}`;
+  return {
+    publicUrl: `${origin}/bot/${botId}`,
+    embedUrl: `${origin}/embed/${botId}.js`
+  };
+}
+
+function sendEmbedScript(res, bot, req) {
+  const urls = buildBotUrls(bot.id, req);
+  const script = `
+(function () {
+  var currentScript = document.currentScript;
+  var botId = (currentScript && currentScript.dataset && currentScript.dataset.botId) || ${JSON.stringify(bot.id)};
+  var target = document.body || (currentScript && currentScript.parentElement) || document.documentElement;
+  var iframe = document.createElement("iframe");
+  iframe.src = "${urls.publicUrl}?embed=1";
+  iframe.title = ${JSON.stringify(bot.profile?.projectName || "Chatbot")};
+  iframe.loading = "lazy";
+  iframe.referrerPolicy = "no-referrer-when-downgrade";
+  iframe.style.border = "0";
+  iframe.style.width = "100%";
+  iframe.style.maxWidth = "420px";
+  iframe.style.height = "620px";
+  iframe.style.borderRadius = "24px";
+  iframe.style.overflow = "hidden";
+  iframe.dataset.botId = botId;
+  target.appendChild(iframe);
+})();
+`.trim();
+
+  res.writeHead(200, { "Content-Type": "application/javascript; charset=utf-8" });
+  res.end(script);
+}
+
+async function serveBotPage(res) {
+  try {
+    const data = await readFile(resolve(publicDir, "bot.html"));
+    return sendFile(res, 200, data, ".html");
+  } catch {
+    return sendText(res, 500, "Bot page is unavailable");
+  }
+}
+
+function escapeAttribute(value) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 async function loadEnvFile(filePath) {
   try {
     const raw = await readFile(filePath, "utf8");
@@ -136,7 +278,14 @@ async function loadEnvFile(filePath) {
 }
 
 async function generateChatReply(body) {
-  const profile = body.profile || {};
+  const botId = String(body.botId || "").trim();
+  let profile = body.profile || {};
+  if (botId) {
+    const storedBot = await getBot(botId);
+    if (storedBot?.profile) {
+      profile = storedBot.profile;
+    }
+  }
   const userMessage = String(body.message || "").trim();
   const history = Array.isArray(body.conversation) ? body.conversation : [];
   const allChunks = Array.isArray(profile.websiteChunks) ? profile.websiteChunks : [];
@@ -554,32 +703,36 @@ async function fetchWebsiteContext(websiteUrl) {
       return empty;
     }
 
-    const candidates = await collectWebsiteCandidates(normalizedUrl, homepage);
     const pages = [homepage];
-    
-    // Process up to 25 candidates in batches of 5 to avoid overwhelming the browser
-    const candidatesToProcess = candidates.slice(0, 25);
-    for (let i = 0; i < candidatesToProcess.length; i += 5) {
-      const batch = candidatesToProcess.slice(i, i + 5);
-      const pageFetches = batch.map((url) => fetchPage(url, browser));
-      const fetchedPages = await Promise.all(pageFetches);
-      for (const page of fetchedPages) {
-        if (page && !isNotFoundPage(page)) pages.push(page);
+
+    try {
+      const crawledPages = await crawlWebsitePages(normalizedUrl, homepage, browser);
+      for (const page of crawledPages) {
+        if (page && !isNotFoundPage(page)) {
+          pages.push(page);
+        }
       }
+    } catch {
+      // Keep homepage data even if deeper crawling fails.
     }
 
-    const navigatedPages = await crawlRenderedNavigation(normalizedUrl, browser);
-    for (const page of navigatedPages) {
-      if (page && !isNotFoundPage(page)) pages.push(page);
+    try {
+      const navigatedPages = await crawlRenderedNavigation(normalizedUrl, browser);
+      for (const page of navigatedPages) {
+        if (page && !isNotFoundPage(page)) pages.push(page);
+      }
+    } catch {
+      // Keep homepage data even if rendered navigation fails.
     }
 
     const uniquePages = dedupePages(pages);
+    const safePages = uniquePages.length ? uniquePages : [homepage];
 
-    const title = uniquePages.find((page) => page.title)?.title || homepage.title;
-    const summary = buildCombinedWebsiteSummary(uniquePages);
-    const topics = extractTopicsFromPages(uniquePages);
-    const chunks = buildWebsiteChunks(uniquePages);
-    const sections = uniquePages.flatMap((page) => Array.isArray(page.sections) ? page.sections : []);
+    const title = safePages.find((page) => cleanText(page.title || page.description || page.summary))?.title || homepage.title || normalizedUrl.hostname;
+    const summary = buildCombinedWebsiteSummary(safePages) || homepage.summary || homepage.description || homepage.text || homepage.title || "";
+    const topics = extractTopicsFromPages(safePages);
+    const chunks = buildWebsiteChunks(safePages);
+    const sections = safePages.flatMap((page) => Array.isArray(page.sections) ? page.sections : []);
 
     if (browser) {
       await browser.close().catch(() => {});
@@ -588,7 +741,7 @@ async function fetchWebsiteContext(websiteUrl) {
     return {
       title,
       summary,
-      pages: uniquePages.map((page) => ({
+      pages: safePages.map((page) => ({
         url: page.url,
         title: page.title,
         summary: page.summary
@@ -606,11 +759,70 @@ async function fetchWebsiteContext(websiteUrl) {
   }
 }
 
-async function getWebsiteContext(websiteUrl) {
+async function crawlWebsitePages(baseUrl, homepage, browser) {
+  const pages = [];
+  const seenUrls = new Set();
+  const queuedUrls = new Set();
+  const queue = [];
+  const maxPages = 80;
+  const maxDepth = 3;
+
+  function enqueue(url, depth) {
+    const normalized = normalizeCrawlUrl(baseUrl, url);
+    if (!normalized) return;
+    if (seenUrls.has(normalized) || queuedUrls.has(normalized)) return;
+    queuedUrls.add(normalized);
+    queue.push({ url: normalized, depth });
+  }
+
+  function addPage(page) {
+    const normalized = normalizeCrawlUrl(baseUrl, page?.url || "");
+    if (!normalized || seenUrls.has(normalized)) return false;
+    seenUrls.add(normalized);
+    pages.push(page);
+    return true;
+  }
+
+  addPage(homepage);
+  for (const candidate of await collectWebsiteCandidates(baseUrl, homepage)) {
+    enqueue(candidate, 1);
+  }
+  for (const link of getFollowableLinks(baseUrl, homepage)) {
+    enqueue(link, 1);
+  }
+
+  while (queue.length && pages.length < maxPages) {
+    const { url, depth } = queue.shift();
+    queuedUrls.delete(url);
+    if (seenUrls.has(url)) continue;
+
+    const page = await fetchPage(url, browser);
+    if (!page || isNotFoundPage(page)) {
+      continue;
+    }
+
+    addPage(page);
+    if (depth >= maxDepth) {
+      continue;
+    }
+
+    for (const link of getFollowableLinks(baseUrl, page)) {
+      enqueue(link, depth + 1);
+    }
+  }
+
+  return pages;
+}
+
+async function getWebsiteContext(websiteUrl, forceRefresh = false) {
   const normalizedUrl = normalizeWebsiteUrl(websiteUrl);
   const key = normalizedUrl ? normalizedUrl.toString() : "";
   if (!key) {
     return { title: "", summary: "", pages: [], sections: [], chunks: [], topics: [] };
+  }
+
+  if (forceRefresh) {
+    websiteContextCache.delete(key);
   }
 
   const cached = websiteContextCache.get(key);
@@ -630,6 +842,51 @@ async function getWebsiteContext(websiteUrl) {
   });
 
   return value;
+}
+
+async function getSimpleWebsiteContext(websiteUrl) {
+  const empty = { title: "", summary: "", pages: [], sections: [], chunks: [], topics: [] };
+  const normalizedUrl = normalizeWebsiteUrl(websiteUrl);
+  if (!normalizedUrl) return empty;
+
+  try {
+    const homepage = await fetchStaticPage(normalizedUrl.toString());
+    if (!homepage) return empty;
+
+    const pages = [homepage];
+    const candidateUrls = new Set([
+      ...discoverRelevantUrls(normalizedUrl, homepage),
+      ...discoverLikelyRoutes(normalizedUrl),
+      ...(Array.isArray(homepage.links) ? homepage.links.map((link) => link.href).filter(Boolean) : [])
+    ]);
+
+    let added = 0;
+    for (const candidate of candidateUrls) {
+      if (added >= 12) break;
+      const page = await fetchStaticPage(candidate);
+      if (!page || isNotFoundPage(page)) continue;
+      pages.push(page);
+      added += 1;
+    }
+
+    const uniquePages = dedupePages(pages);
+    const safePages = uniquePages.length ? uniquePages : [homepage];
+
+    return {
+      title: safePages.find((page) => cleanText(page.title || page.description || page.summary))?.title || homepage.title || normalizedUrl.hostname,
+      summary: buildCombinedWebsiteSummary(safePages) || homepage.summary || homepage.description || homepage.text || homepage.title || "",
+      pages: safePages.map((page) => ({
+        url: page.url,
+        title: page.title,
+        summary: page.summary
+      })),
+      sections: safePages.flatMap((page) => Array.isArray(page.sections) ? page.sections : []),
+      chunks: buildWebsiteChunks(safePages),
+      topics: extractTopicsFromPages(safePages)
+    };
+  } catch {
+    return empty;
+  }
 }
 
 async function collectWebsiteCandidates(baseUrl, homepage) {
@@ -655,6 +912,88 @@ async function collectWebsiteCandidates(baseUrl, homepage) {
   return [...candidates].filter(Boolean);
 }
 
+function getFollowableLinks(baseUrl, page) {
+  const links = Array.isArray(page?.links) ? page.links : [];
+  const candidates = new Map();
+
+  for (const link of links) {
+    const rawHref = String(link?.href || "").trim();
+    if (!rawHref) continue;
+    if (/^(mailto:|tel:|javascript:|#)/i.test(rawHref)) continue;
+
+    try {
+      const resolved = new URL(rawHref, baseUrl);
+      if (resolved.origin !== baseUrl.origin) continue;
+      resolved.hash = "";
+      const normalized = resolved.toString();
+      if (!normalized || isSkippableAssetUrl(normalized)) continue;
+
+      const text = cleanText(link?.text || "").toLowerCase();
+      const score = scoreCrawlLink(normalized, text);
+      const previous = candidates.get(normalized) || -1;
+      if (score > previous) {
+        candidates.set(normalized, score);
+      }
+    } catch {
+      // ignore invalid links
+    }
+  }
+
+  return [...candidates.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([url]) => url);
+}
+
+function scoreCrawlLink(url, text = "") {
+  const href = String(url || "").toLowerCase();
+  const haystack = `${href} ${text}`;
+  const keywordWeights = [
+    ["experience", 8],
+    ["projects", 8],
+    ["project", 8],
+    ["portfolio", 8],
+    ["services", 7],
+    ["service", 7],
+    ["pricing", 7],
+    ["price", 7],
+    ["contact", 7],
+    ["about", 6],
+    ["faq", 6],
+    ["support", 6],
+    ["skills", 6],
+    ["education", 6],
+    ["certification", 5],
+    ["blog", 4],
+    ["docs", 4],
+    ["documentation", 4],
+    ["solutions", 4]
+  ];
+
+  let score = 0;
+  for (const [keyword, weight] of keywordWeights) {
+    if (haystack.includes(keyword)) score += weight;
+  }
+
+  const pathDepth = href.split("/").filter(Boolean).length;
+  if (pathDepth === 1) score += 2;
+  if (pathDepth === 2) score += 1;
+  if (pathDepth >= 4) score -= 1;
+  if (/index\.html?$/.test(href)) score -= 2;
+  return score;
+}
+
+function normalizeCrawlUrl(baseUrl, input) {
+  try {
+    const resolved = new URL(String(input || ""), baseUrl);
+    if (resolved.origin !== baseUrl.origin) return "";
+    resolved.hash = "";
+    if (isSkippableAssetUrl(resolved.toString())) return "";
+    return resolved.toString();
+  } catch {
+    return "";
+  }
+}
+
 async function crawlRenderedNavigation(baseUrl, browser) {
   if (!browser) {
     return [];
@@ -670,7 +1009,7 @@ async function crawlRenderedNavigation(baseUrl, browser) {
 
   try {
     try {
-      await page.goto(baseUrl.toString(), { waitUntil: "networkidle", timeout: 20000 });
+      await page.goto(baseUrl.toString(), { waitUntil: "networkidle2", timeout: 20000 });
     } catch {
       try {
         await page.goto(baseUrl.toString(), { waitUntil: "load", timeout: 15000 });
@@ -678,6 +1017,7 @@ async function crawlRenderedNavigation(baseUrl, browser) {
         // proceed and try to read whatever loaded
       }
     }
+    await autoScrollPage(page);
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     const homepage = await loadRenderedPageFromCurrentState(page, baseUrl.toString());
@@ -687,12 +1027,26 @@ async function crawlRenderedNavigation(baseUrl, browser) {
 
     addUniqueRenderedPage(pages, seen, homepage);
 
-    const labels = ["experience", "projects", "skills", "education", "certifications", "contact", "about", "portfolio", "resume"];
+    const labels = await discoverRenderedNavigationLabels(page);
+    const fallbackLabels = ["experience", "projects", "skills", "education", "certifications", "contact", "about", "portfolio", "resume"];
+    const crawlLabels = [...new Set([...labels, ...fallbackLabels])];
 
-    for (const label of labels) {
+    for (const label of crawlLabels) {
+      try {
+        await page.goto(baseUrl.toString(), { waitUntil: "networkidle2", timeout: 20000 });
+      } catch {
+        try {
+          await page.goto(baseUrl.toString(), { waitUntil: "load", timeout: 15000 });
+        } catch {
+          // if homepage reload fails, try clicking from the current state
+        }
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1500));
       const clicked = await clickRenderedNavigation(page, label);
       if (!clicked) continue;
 
+      await autoScrollPage(page);
       await new Promise(resolve => setTimeout(resolve, 4000));
       const state = await loadRenderedPageFromCurrentState(page, page.url());
       addUniqueRenderedPage(pages, seen, state);
@@ -704,6 +1058,37 @@ async function crawlRenderedNavigation(baseUrl, browser) {
   }
 
   return pages;
+}
+
+async function discoverRenderedNavigationLabels(page) {
+  try {
+    return await page.evaluate(() => {
+      const selectors = ["nav a", "nav button", "header a", "header button", "a", "button", "[role='button']", "li", "span"];
+      const stopWords = new Set([
+        "home", "menu", "open", "close", "more", "read more", "learn more", "view more",
+        "contact me", "download cv", "download resume", "hire me", "submit"
+      ]);
+      const labels = [];
+      const seen = new Set();
+
+      for (const selector of selectors) {
+        const elements = Array.from(document.querySelectorAll(selector));
+        for (const el of elements) {
+          const text = String(el.textContent || "").replace(/\s+/g, " ").trim();
+          if (!text || text.length < 2 || text.length > 40) continue;
+          if (/\b(home|menu|open|close|read more|learn more|view more)\b/i.test(text)) continue;
+          const normalized = text.toLowerCase();
+          if (stopWords.has(normalized) || seen.has(normalized)) continue;
+          seen.add(normalized);
+          labels.push(text);
+        }
+      }
+
+      return labels.slice(0, 24);
+    });
+  } catch {
+    return [];
+  }
 }
 
 async function clickRenderedNavigation(page, label) {
@@ -750,6 +1135,34 @@ async function loadRenderedPageFromCurrentState(page, url) {
     };
   } catch {
     return null;
+  }
+}
+
+async function autoScrollPage(page) {
+  try {
+    await page.evaluate(async () => {
+      await new Promise((resolve) => {
+        let totalHeight = 0;
+        const step = Math.max(240, Math.floor(window.innerHeight * 0.7));
+        const maxSteps = 20;
+        let steps = 0;
+
+        const timer = setInterval(() => {
+          const scrollHeight = document.body?.scrollHeight || document.documentElement?.scrollHeight || 0;
+          window.scrollBy(0, step);
+          totalHeight += step;
+          steps += 1;
+
+          if (steps >= maxSteps || totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            window.scrollTo(0, 0);
+            resolve();
+          }
+        }, 250);
+      });
+    });
+  } catch {
+    // ignore scroll failures
   }
 }
 
@@ -803,15 +1216,16 @@ async function fetchRenderedPage(url, browser = null) {
     return null;
   }
 
+  let page = null;
   try {
-    const page = await browser.newPage({
+    page = await browser.newPage({
       viewport: { width: 1440, height: 2200 },
       userAgent: "Mozilla/5.0 (compatible; OwnChatbotAgent/1.0)"
     });
 
     let response;
     try {
-      response = await page.goto(url, { waitUntil: "networkidle", timeout: 15000 });
+      response = await page.goto(url, { waitUntil: "networkidle2", timeout: 15000 });
     } catch {
       try {
         response = await page.goto(url, { waitUntil: "load", timeout: 10000 });
@@ -820,6 +1234,7 @@ async function fetchRenderedPage(url, browser = null) {
       }
     }
 
+    await autoScrollPage(page);
     await new Promise(resolve => setTimeout(resolve, 4000)); // Wait for 3D/SPA animations and fetches
 
     const contentType = String(response?.headers()?.["content-type"] || "").toLowerCase();
@@ -835,7 +1250,9 @@ async function fetchRenderedPage(url, browser = null) {
       return null;
     }
 
-    const data = await page.evaluate(() => {
+    let data = null;
+    try {
+      data = await page.evaluate(() => {
       const title = document.title || "";
       const description = document.querySelector('meta[name="description"]')?.getAttribute("content") || "";
       const headings = Array.from(document.querySelectorAll("h1, h2, h3"))
@@ -979,7 +1396,24 @@ async function fetchRenderedPage(url, browser = null) {
         }
         return "";
       }
-    });
+      });
+    } catch {
+      data = null;
+    }
+
+    if (!data) {
+      const fallbackHtml = await page.content().catch(() => "");
+      const fallbackDetails = extractWebsiteContextFromHtml(fallbackHtml, page.url() || url);
+      data = {
+        title: fallbackDetails.title || "",
+        description: fallbackDetails.description || "",
+        headings: Array.isArray(fallbackDetails.headings) ? fallbackDetails.headings : [],
+        text: fallbackDetails.text || "",
+        links: Array.isArray(fallbackDetails.links) ? fallbackDetails.links : [],
+        sections: Array.isArray(fallbackDetails.sections) ? fallbackDetails.sections : [],
+        html: fallbackHtml || ""
+      };
+    }
 
     const renderedText = cleanText(data.text || "");
     if (looksLikeBinaryText(renderedText) || hasPdfNoise(renderedText)) {
@@ -1026,6 +1460,10 @@ async function fetchRenderedPage(url, browser = null) {
     };
   } catch {
     return null;
+  } finally {
+    if (page) {
+      await page.close().catch(() => {});
+    }
   }
 }
 

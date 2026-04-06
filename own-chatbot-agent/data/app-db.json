@@ -1,0 +1,1001 @@
+{
+  "meta": {
+    "schemaVersion": 1,
+    "createdAt": "2026-04-06T10:48:42.127Z",
+    "updatedAt": "2026-04-06T11:01:17.078Z"
+  },
+  "users": [],
+  "bots": [
+    {
+      "id": "b2c508a3-d1c3-4357-a08c-bd095408f2f2",
+      "createdAt": "2026-04-06T10:49:53.127Z",
+      "updatedAt": "2026-04-06T10:49:53.127Z",
+      "status": "published",
+      "profile": {
+        "projectName": "Acme Support Bot",
+        "businessType": "SaaS",
+        "websiteUrl": "https://example.com",
+        "websiteTitle": "Example",
+        "websiteSummary": "Example summary",
+        "websitePages": [],
+        "websiteSections": [],
+        "websiteChunks": [],
+        "websiteTopics": [],
+        "tone": "clear, technical, and support-friendly",
+        "goals": [
+          "answer product questions",
+          "qualify leads",
+          "support onboarding"
+        ],
+        "targetAudience": "website visitors",
+        "knowledgeSources": [
+          "Website: https://example.com"
+        ],
+        "leadCaptureFields": [
+          "name",
+          "email"
+        ],
+        "handoffConditions": [
+          "The bot is uncertain about the answer."
+        ],
+        "allowedTopics": [
+          "pricing",
+          "features",
+          "support"
+        ],
+        "blockedTopics": [
+          "legal advice",
+          "medical diagnosis"
+        ],
+        "prompt": "You are the AI chatbot for Acme Support Bot.",
+        "botId": "b2c508a3-d1c3-4357-a08c-bd095408f2f2",
+        "publishUrl": "",
+        "embedUrl": ""
+      },
+      "source": "local-db"
+    }
+  ],
+  "pages": [],
+  "messages": [
+    {
+      "id": "c9377b97-0d38-4071-bd21-7c125c074e95",
+      "createdAt": "2026-04-06T10:59:39.016Z",
+      "botId": "",
+      "sessionId": "",
+      "userMessage": "ok contact of her",
+      "assistantReply": "From the contact page: masum-3d-portfolio Projects Admin & Employee Dashboard for Task Tracking Dating Places Discovery Platform Pothole Detection System 3D Home Catalog Visualization Machine Unlearning: Comparative Analysis (Ongoing) masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Projects A selec...",
+      "provider": "fallback",
+      "metadata": {}
+    },
+    {
+      "id": "54abf66a-fe24-42ae-b8c9-e2bbf211813a",
+      "createdAt": "2026-04-06T10:59:21.649Z",
+      "botId": "",
+      "sessionId": "",
+      "userMessage": "how many times around shei s working with full stack",
+      "assistantReply": "Masum Verma has experience working with full stack as a:\n- Full Stack Developer at Mobilions Labs Pvt Ltd, where she worked on MERN-based applications, REST APIs, frontend–backend integration, and scalable production systems. \n\nThis is mentioned at least once in the provided excerpts.",
+      "provider": "groq",
+      "metadata": {}
+    },
+    {
+      "id": "87004b63-5501-4f31-b6cb-972d76afca3d",
+      "createdAt": "2026-04-06T10:58:54.299Z",
+      "botId": "",
+      "sessionId": "",
+      "userMessage": "and does she has experience of full stack",
+      "assistantReply": "From the experience page: experience Full Stack Developer Mobilions Labs Pvt Ltd Worked on MERN-based applications, REST APIs, frontend–backend integration, and scalable production systems.",
+      "provider": "fallback",
+      "metadata": {}
+    },
+    {
+      "id": "9015c33f-f858-47b3-8d24-3dd4c88184b0",
+      "createdAt": "2026-04-06T10:58:35.884Z",
+      "botId": "",
+      "sessionId": "",
+      "userMessage": "education",
+      "assistantReply": "M.Tech – Computer Science & Engineering, Nirma University, CGPA: 8.6 \nB.E – Computer Engineering, SVIT Vasad, CGPA: 9.21 \nHSC – PCM, Krishna Science School, Percentile: 90.36 \nSSC, Shree Gujarat Vidyut Board Vidyalaya, Percentile: 99.33",
+      "provider": "groq",
+      "metadata": {}
+    },
+    {
+      "id": "944be57b-448e-4c0a-808c-8bf8f9c94bda",
+      "createdAt": "2026-04-06T10:50:34.539Z",
+      "botId": "b2c508a3-d1c3-4357-a08c-bd095408f2f2",
+      "sessionId": "",
+      "userMessage": "What plans do you offer?",
+      "assistantReply": "I do not have that information at this time.",
+      "provider": "groq",
+      "metadata": {}
+    }
+  ],
+  "leads": [],
+  "crawlRuns": [
+    {
+      "id": "02a87d54-92f8-48d7-b93e-444c2c4c06de",
+      "createdAt": "2026-04-06T11:01:17.077Z",
+      "websiteUrl": "https://masum-portfolio-green.vercel.app/",
+      "title": "masum-3d-portfolio",
+      "summary": "masum-3d-portfolio: masum-3d-portfolio Masum  Verma Home Experience Projects Skills Education Certifications Contact Hi, I am Masum Verma Full-Stack Developer | AI-ML Enthusiastic 👀 View Resume ⬇️ Download | masum-3d-portfolio: Masum <br> Verma masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Hi, I am Masum Verma Full-Stack Developer | AI-ML Enthusiastic 👀 View Resume ⬇️ Download | masum-3d-portfolio: Experience. Full Stack Developer — Mobilions Labs Pvt Ltd. Software Engineer Intern — Vistanova Infotech. Web Developer Intern — QuantixTech Solutions Pvt Ltd masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Experience A snapshot of my professional journey and the problems I’ve solved Scroll Full Stack Developer — Mobilions Labs Pvt Ltd Worked on MERN-based applications, REST APIs, frontend–backend integration, and scalable production systems. Software Engineer Intern — Vistanova Infotech Built an interactive 3D home catalog using Three.js and Blender with real-time visualization and smooth user interaction. Web Developer Intern — QuantixTech Solutions Pvt Ltd Designed and developed responsive websites using WordPress, HTML, CSS, and JavaScript for real-world clients. | masum-3d-portfolio: Projects. Admin & Employee Dashboard for Task Tracking. Dating Places Discovery Platform. Pothole Detection System. 3D Home Catalog Visualization. Machine Unlearning: Comparative Analysis (Ongoing) masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Projects A selection of projects showcasing my work across full-stack development, 3D visualization, and machine learning. ← → 01 Admin & Employee Dashboard for Task Tracking Developed a task tracking system where employees submit daily work reports, and admins assign tasks and monitor employee progress. MongoDB • Next.js • React • Express • Node.js 02 Dating Places Discovery Platform Worked on a client-based internship project, developing backend APIs and admin dashboard features for a NYC-based dating places discovery platform with role-based access control. PostgreSQL • Node.js • Next.js • React • Pr... | masum-3d-portfolio: Skills. Frontend. Backend. Database. Data & ML masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Skills Technologies and tools I work with across the stack. Frontend HTML CSS JavaScript ReactJS Vue.js Next.js Three.js jQuery WordPress Backend Node.js Express.js Flask REST APIs API Testing (Postman) Database MongoDB PostgreSQL SQL Data & ML Python Machine Learning Apache Spark Hadoop MERN Stack | masum-3d-portfolio: Education. M.Tech – Computer Science & Engineering. B.E – Computer Engineering. HSC – PCM. SSC masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Education A timeline of my academic growth and learning journey. 2024 – 2026 M.Tech – Computer Science & Engineering Nirma University CGPA: 8.6 2020 – 2024 B.E – Computer Engineering SVIT Vasad CGPA: 9.21 2020 HSC – PCM Krishna Science School Percentile: 90.36 2018 SSC Shree Gujarat Vidyut Board Vidyalaya Percentile: 99.33 | masum-3d-portfolio: Certifications masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Certifications certifications.log $ completed IBM Developers Skill Network SQL Databases $ completed Google Cloud Ready Google Cloud Platform $ completed Deloitte Data Analytics Job Simulation Tableau Data Analytics $ completed Python Course for Beginners Python $ completed Application of Machine Learning and Deep Learning Machine Learning Deep Learning $ completed Generative AI fundamentals AI | masum-3d-portfolio: Connect With Me masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Connect With Me Let’s collaborate, build, or just have a conversation. I’m always open to discussing opportunities, projects, internships, or research collaborations. 🔗 LinkedIn 💻 GitHub 🧠 LeetCode Send Message Or email me directly at vermamasum.test@gmail.com",
+      "pages": [
+        {
+          "url": "https://masum-portfolio-green.vercel.app/",
+          "title": "masum-3d-portfolio",
+          "summary": "masum-3d-portfolio Masum  Verma Home Experience Projects Skills Education Certifications Contact Hi, I am Masum Verma Full-Stack Developer | AI-ML Enthusiastic 👀 View Resume ⬇️ Download"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/",
+          "title": "masum-3d-portfolio",
+          "summary": "Masum <br> Verma masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Hi, I am Masum Verma Full-Stack Developer | AI-ML Enthusiastic 👀 View Resume ⬇️ Download"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "title": "masum-3d-portfolio",
+          "summary": "Experience. Full Stack Developer — Mobilions Labs Pvt Ltd. Software Engineer Intern — Vistanova Infotech. Web Developer Intern — QuantixTech Solutions Pvt Ltd masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Experience A snapshot of my professional journey and the problems I’ve solved Scroll Full Stack Developer — Mobilions Labs Pvt Ltd Worked on MERN-based applications, REST APIs, frontend–backend integration, and scalable production systems. Software Engineer Intern — Vistanova Infotech Built an interactive 3D home catalog using Three.js and Blender with real-time visualization and smooth user interaction. Web Developer Intern — QuantixTech Solutions Pvt Ltd Designed and developed responsive websites using WordPress, HTML, CSS, and JavaScript for real-world clients."
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "title": "masum-3d-portfolio",
+          "summary": "Projects. Admin & Employee Dashboard for Task Tracking. Dating Places Discovery Platform. Pothole Detection System. 3D Home Catalog Visualization. Machine Unlearning: Comparative Analysis (Ongoing) masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Projects A selection of projects showcasing my work across full-stack development, 3D visualization, and machine learning. ← → 01 Admin & Employee Dashboard for Task Tracking Developed a task tracking system where employees submit daily work reports, and admins assign tasks and monitor employee progress. MongoDB • Next.js • React • Express • Node.js 02 Dating Places Discovery Platform Worked on a client-based internship project, developing backend APIs and admin dashboard features for a NYC-based dating places discovery platform with role-based access control. PostgreSQL • Node.js • Next.js • React • Pr..."
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "title": "masum-3d-portfolio",
+          "summary": "Skills. Frontend. Backend. Database. Data & ML masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Skills Technologies and tools I work with across the stack. Frontend HTML CSS JavaScript ReactJS Vue.js Next.js Three.js jQuery WordPress Backend Node.js Express.js Flask REST APIs API Testing (Postman) Database MongoDB PostgreSQL SQL Data & ML Python Machine Learning Apache Spark Hadoop MERN Stack"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/education",
+          "title": "masum-3d-portfolio",
+          "summary": "Education. M.Tech – Computer Science & Engineering. B.E – Computer Engineering. HSC – PCM. SSC masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Education A timeline of my academic growth and learning journey. 2024 – 2026 M.Tech – Computer Science & Engineering Nirma University CGPA: 8.6 2020 – 2024 B.E – Computer Engineering SVIT Vasad CGPA: 9.21 2020 HSC – PCM Krishna Science School Percentile: 90.36 2018 SSC Shree Gujarat Vidyut Board Vidyalaya Percentile: 99.33"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "title": "masum-3d-portfolio",
+          "summary": "Certifications masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Certifications certifications.log $ completed IBM Developers Skill Network SQL Databases $ completed Google Cloud Ready Google Cloud Platform $ completed Deloitte Data Analytics Job Simulation Tableau Data Analytics $ completed Python Course for Beginners Python $ completed Application of Machine Learning and Deep Learning Machine Learning Deep Learning $ completed Generative AI fundamentals AI"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/contact",
+          "title": "masum-3d-portfolio",
+          "summary": "Connect With Me masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Connect With Me Let’s collaborate, build, or just have a conversation. I’m always open to discussing opportunities, projects, internships, or research collaborations. 🔗 LinkedIn 💻 GitHub 🧠 LeetCode Send Message Or email me directly at vermamasum.test@gmail.com"
+        }
+      ],
+      "sections": [
+        {
+          "url": "https://masum-portfolio-green.vercel.app/",
+          "kind": "experience",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "subtitle": "",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "description": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "Home Experience Projects Skills Education Certifications Contact",
+          "links": [
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Home</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>"
+          ]
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/",
+          "kind": "experience",
+          "title": "Masum <br> Verma",
+          "subtitle": "",
+          "role": "Developer | AI-ML Enthusiastic",
+          "company": "",
+          "description": "Hi, I am Full-Stack Developer | AI-ML Enthusiastic",
+          "text": "Masum <br> Verma Hi, I am Full-Stack Developer | AI-ML Enthusiastic",
+          "links": [
+            "👀 View Resume",
+            "⬇️ Download"
+          ]
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "kind": "experience",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "subtitle": "",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "description": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "Home Experience Projects Skills Education Certifications Contact",
+          "links": [
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Home</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>"
+          ]
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "kind": "experience",
+          "title": "Experience",
+          "subtitle": "",
+          "role": "Experience",
+          "company": "",
+          "description": "A snapshot of my professional journey and the problems I’ve solved",
+          "text": "Experience A snapshot of my professional journey and the problems I’ve solved",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "kind": "experience",
+          "title": "Full Stack Developer",
+          "subtitle": "Mobilions Labs Pvt Ltd",
+          "role": "Full Stack Developer",
+          "company": "",
+          "description": "Worked on MERN-based applications, REST APIs, frontend–backend integration, and scalable production systems.",
+          "text": "Full Stack Developer — Mobilions Labs Pvt Ltd Worked on MERN-based applications, REST APIs, frontend–backend integration, and scalable production systems.",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "kind": "experience",
+          "title": "Software Engineer Intern",
+          "subtitle": "Vistanova Infotech",
+          "role": "Software Engineer Intern",
+          "company": "",
+          "description": "Built an interactive 3D home catalog using Three.js and Blender with real-time visualization and smooth user interaction.",
+          "text": "Software Engineer Intern — Vistanova Infotech Built an interactive 3D home catalog using Three.js and Blender with real-time visualization and smooth user interaction.",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "kind": "experience",
+          "title": "Web Developer Intern",
+          "subtitle": "QuantixTech Solutions Pvt Ltd",
+          "role": "Developer Intern",
+          "company": "real-world clients.",
+          "description": "Designed and developed responsive websites using WordPress, HTML, CSS, and JavaScript for real-world clients.",
+          "text": "Web Developer Intern — QuantixTech Solutions Pvt Ltd Designed and developed responsive websites using WordPress, HTML, CSS, and JavaScript for real-world clients.",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "kind": "experience",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "subtitle": "",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "description": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "Home Experience Projects Skills Education Certifications Contact",
+          "links": [
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Home</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>"
+          ]
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "kind": "experience",
+          "title": "Admin & Employee Dashboard for Task Tracking",
+          "subtitle": "",
+          "role": "Admin & Employee Dashboard for Task Tracking",
+          "company": "Task Tracking Developed a task tracking system where employees submit daily work",
+          "description": "Developed a task tracking system where employees submit daily work reports, and admins assign tasks and monitor employee progress. MongoDB • Next.js • React • Express • Node.js",
+          "text": "Admin & Employee Dashboard for Task Tracking Developed a task tracking system where employees submit daily work reports, and admins assign tasks and monitor employee progress. MongoDB • Next.js • React • Express • Node.js",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "kind": "experience",
+          "title": "Dating Places Discovery Platform",
+          "subtitle": "",
+          "role": "internship project",
+          "company": "a NYC-based dating places discovery platform with role-based access control. Post",
+          "description": "Worked on a client-based internship project, developing backend APIs and admin dashboard features for a NYC-based dating places discovery platform with role-based access control. PostgreSQL • Node.js • Next.js • React • Prisma",
+          "text": "Dating Places Discovery Platform Worked on a client-based internship project, developing backend APIs and admin dashboard features for a NYC-based dating places discovery platform with role-based access control. PostgreSQL • Node.js • Next.js • React • Prisma",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "kind": "section",
+          "title": "Pothole Detection System",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "Built a real-time pothole detection system using the YOLO object detection algorithm for automated road condition analysis. Machine Learning • YOLO • Object Detection",
+          "text": "Pothole Detection System Built a real-time pothole detection system using the YOLO object detection algorithm for automated road condition analysis. Machine Learning • YOLO • Object Detection",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "kind": "section",
+          "title": "3D Home Catalog Visualization",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "Designed and developed an interactive 3D virtual home using React.js, Three.js, and Blender for real-time visualization. React • Three.js • Blender",
+          "text": "3D Home Catalog Visualization Designed and developed an interactive 3D virtual home using React.js, Three.js, and Blender for real-time visualization. React • Three.js • Blender",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "kind": "section",
+          "title": "Machine Unlearning: Comparative Analysis (Ongoing)",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "Performing a comparative analysis of machine unlearning algorithms on image datasets to evaluate efficiency, accuracy, and impact on model performance. Machine Learning • Machine Unlearning • Research",
+          "text": "Machine Unlearning: Comparative Analysis (Ongoing) Performing a comparative analysis of machine unlearning algorithms on image datasets to evaluate efficiency, accuracy, and impact on model performance. Machine Learning • Machine Unlearning • Research",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "kind": "experience",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "subtitle": "",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "description": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "Home Experience Projects Skills Education Certifications Contact",
+          "links": [
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Home</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>"
+          ]
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "kind": "section",
+          "title": "Frontend",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "Frontend HTML CSS JavaScript ReactJS Vue.js Next.js Three.js jQuery WordPress",
+          "text": "Frontend Frontend HTML CSS JavaScript ReactJS Vue.js Next.js Three.js jQuery WordPress",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "kind": "section",
+          "title": "Backend",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "Backend Node.js Express.js Flask REST APIs API Testing (Postman)",
+          "text": "Backend Backend Node.js Express.js Flask REST APIs API Testing (Postman)",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "kind": "section",
+          "title": "Database",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "Database MongoDB PostgreSQL SQL",
+          "text": "Database Database MongoDB PostgreSQL SQL",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "kind": "section",
+          "title": "Data & ML",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "Data & ML Python Machine Learning Apache Spark Hadoop MERN Stack",
+          "text": "Data & ML Data & ML Python Machine Learning Apache Spark Hadoop MERN Stack",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/education",
+          "kind": "experience",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "subtitle": "",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "description": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "Home Experience Projects Skills Education Certifications Contact",
+          "links": [
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Home</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>"
+          ]
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "kind": "experience",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "subtitle": "",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "description": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "Home Experience Projects Skills Education Certifications Contact",
+          "links": [
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Home</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>"
+          ]
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "kind": "experience",
+          "title": "$ completed IBM Developers Skill Network SQL Databases",
+          "subtitle": "",
+          "role": "Developers Skill Network SQL Databases",
+          "company": "",
+          "description": "$ completed IBM Developers Skill Network SQL Databases",
+          "text": "$ completed IBM Developers Skill Network SQL Databases",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "kind": "section",
+          "title": "$ completed Google Cloud Ready Google Cloud Platform",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "$ completed Google Cloud Ready Google Cloud Platform",
+          "text": "$ completed Google Cloud Ready Google Cloud Platform",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "kind": "section",
+          "title": "$ completed Deloitte Data Analytics Job Simulation Tableau Data Analytics",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "$ completed Deloitte Data Analytics Job Simulation Tableau Data Analytics",
+          "text": "$ completed Deloitte Data Analytics Job Simulation Tableau Data Analytics",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "kind": "section",
+          "title": "$ completed Python Course for Beginners Python",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "$ completed Python Course for Beginners Python",
+          "text": "$ completed Python Course for Beginners Python",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "kind": "section",
+          "title": "$ completed Application of Machine Learning and Deep Learning Machine Learning Deep Learning",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "$ completed Application of Machine Learning and Deep Learning Machine Learning Deep Learning",
+          "text": "$ completed Application of Machine Learning and Deep Learning Machine Learning Deep Learning",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "kind": "section",
+          "title": "$ completed Generative AI fundamentals AI",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "$ completed Generative AI fundamentals AI",
+          "text": "$ completed Generative AI fundamentals AI",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/contact",
+          "kind": "experience",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "subtitle": "",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "description": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "Home Experience Projects Skills Education Certifications Contact",
+          "links": [
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Home</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span>",
+            "<span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>"
+          ]
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/contact",
+          "kind": "section",
+          "title": "Connect With Me",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "Let’s collaborate, build, or just have a conversation.",
+          "text": "Connect With Me Let’s collaborate, build, or just have a conversation.",
+          "links": []
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/contact",
+          "kind": "experience",
+          "title": "I’m always open to discussing opportunities, projects, internships, or research collaborations.",
+          "subtitle": "",
+          "role": "internships",
+          "company": "",
+          "description": "I’m always open to discussing opportunities, projects, internships, or research collaborations.",
+          "text": "I’m always open to discussing opportunities, projects, internships, or research collaborations.",
+          "links": [
+            "🔗 LinkedIn",
+            "💻 GitHub",
+            "🧠 LeetCode"
+          ]
+        }
+      ],
+      "chunks": [
+        {
+          "url": "https://masum-portfolio-green.vercel.app/",
+          "title": "masum-3d-portfolio",
+          "text": "masum-3d-portfolio Masum Verma Home Experience Projects Skills Education Certifications Contact Hi, I am Masum Verma Full-Stack Developer | AI-ML Enthusiastic 👀 View Resume ⬇️ Download"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "experience Home Experience Projects Skills Education Certifications Contact Home Experience Projects Skills Education Certifications Contact <span class=\"inline-block transition-transform duration-300 ease-out\">Home</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "kind": "experience",
+          "description": "Home Experience Projects Skills Education Certifications Contact"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/",
+          "title": "Masum <br> Verma",
+          "text": "experience Developer | AI-ML Enthusiastic Hi, I am Full-Stack Developer | AI-ML Enthusiastic 👀 View Resume ⬇️ Download",
+          "role": "Developer | AI-ML Enthusiastic",
+          "company": "",
+          "kind": "experience",
+          "description": "Hi, I am Full-Stack Developer | AI-ML Enthusiastic"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/",
+          "title": "masum-3d-portfolio",
+          "text": "masum-3d-portfolio Masum <br> Verma masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Hi, I am Masum Verma Full-Stack Developer | AI-ML Enthusiastic 👀 View Resume ⬇️ Download"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "experience Home Experience Projects Skills Education Certifications Contact Home Experience Projects Skills Education Certifications Contact <span class=\"inline-block transition-transform duration-300 ease-out\">Home</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "kind": "experience",
+          "description": "Home Experience Projects Skills Education Certifications Contact"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "title": "Experience",
+          "text": "experience Experience A snapshot of my professional journey and the problems I’ve solved",
+          "role": "Experience",
+          "company": "",
+          "kind": "experience",
+          "description": "A snapshot of my professional journey and the problems I’ve solved"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "title": "Full Stack Developer",
+          "text": "experience Full Stack Developer Mobilions Labs Pvt Ltd Worked on MERN-based applications, REST APIs, frontend–backend integration, and scalable production systems.",
+          "role": "Full Stack Developer",
+          "company": "",
+          "kind": "experience",
+          "description": "Worked on MERN-based applications, REST APIs, frontend–backend integration, and scalable production systems."
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "title": "Software Engineer Intern",
+          "text": "experience Software Engineer Intern Vistanova Infotech Built an interactive 3D home catalog using Three.js and Blender with real-time visualization and smooth user interaction.",
+          "role": "Software Engineer Intern",
+          "company": "",
+          "kind": "experience",
+          "description": "Built an interactive 3D home catalog using Three.js and Blender with real-time visualization and smooth user interaction."
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "title": "Web Developer Intern",
+          "text": "experience Developer Intern real-world clients. QuantixTech Solutions Pvt Ltd Designed and developed responsive websites using WordPress, HTML, CSS, and JavaScript for real-world clients.",
+          "role": "Developer Intern",
+          "company": "real-world clients.",
+          "kind": "experience",
+          "description": "Designed and developed responsive websites using WordPress, HTML, CSS, and JavaScript for real-world clients."
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/experience",
+          "title": "masum-3d-portfolio",
+          "text": "masum-3d-portfolio Experience Full Stack Developer — Mobilions Labs Pvt Ltd Software Engineer Intern — Vistanova Infotech Web Developer Intern — QuantixTech Solutions Pvt Ltd masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Experience A snapshot of my professional journey and the problems I’ve solved Scroll Full Stack Developer — Mobilions Labs Pvt Ltd Worked on MERN-based applications, REST APIs, frontend–backend integration, and scalable production systems. Software Engineer Intern — Vistanova Infotech Built an interactive 3D home catalog using Three.js and Blender with real-time visualization and smooth user interaction. Web Developer Intern — QuantixTech Solutions Pvt Ltd Designed and developed responsive websites using WordPress, HTML, CSS, and JavaScript for real-world clients."
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "experience Home Experience Projects Skills Education Certifications Contact Home Experience Projects Skills Education Certifications Contact <span class=\"inline-block transition-transform duration-300 ease-out\">Home</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "kind": "experience",
+          "description": "Home Experience Projects Skills Education Certifications Contact"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "title": "Admin & Employee Dashboard for Task Tracking",
+          "text": "experience Admin & Employee Dashboard for Task Tracking Task Tracking Developed a task tracking system where employees submit daily work Developed a task tracking system where employees submit daily work reports, and admins assign tasks and monitor employee progress. MongoDB • Next.js • React • Express • Node.js",
+          "role": "Admin & Employee Dashboard for Task Tracking",
+          "company": "Task Tracking Developed a task tracking system where employees submit daily work",
+          "kind": "experience",
+          "description": "Developed a task tracking system where employees submit daily work reports, and admins assign tasks and monitor employee progress. MongoDB • Next.js • React • Express • Node.js"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "title": "Dating Places Discovery Platform",
+          "text": "experience internship project a NYC-based dating places discovery platform with role-based access control. Post Worked on a client-based internship project, developing backend APIs and admin dashboard features for a NYC-based dating places discovery platform with role-based access control. PostgreSQL • Node.js • Next.js • React • Prisma",
+          "role": "internship project",
+          "company": "a NYC-based dating places discovery platform with role-based access control. Post",
+          "kind": "experience",
+          "description": "Worked on a client-based internship project, developing backend APIs and admin dashboard features for a NYC-based dating places discovery platform with role-based access control. PostgreSQL • Node.js • Next.js • React • Prisma"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "title": "Pothole Detection System",
+          "text": "section Built a real-time pothole detection system using the YOLO object detection algorithm for automated road condition analysis. Machine Learning • YOLO • Object Detection",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "Built a real-time pothole detection system using the YOLO object detection algorithm for automated road condition analysis. Machine Learning • YOLO • Object Detection"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "title": "3D Home Catalog Visualization",
+          "text": "section Designed and developed an interactive 3D virtual home using React.js, Three.js, and Blender for real-time visualization. React • Three.js • Blender",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "Designed and developed an interactive 3D virtual home using React.js, Three.js, and Blender for real-time visualization. React • Three.js • Blender"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "title": "Machine Unlearning: Comparative Analysis (Ongoing)",
+          "text": "section Performing a comparative analysis of machine unlearning algorithms on image datasets to evaluate efficiency, accuracy, and impact on model performance. Machine Learning • Machine Unlearning • Research",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "Performing a comparative analysis of machine unlearning algorithms on image datasets to evaluate efficiency, accuracy, and impact on model performance. Machine Learning • Machine Unlearning • Research"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "title": "masum-3d-portfolio (part 1)",
+          "text": "masum-3d-portfolio Projects Admin & Employee Dashboard for Task Tracking Dating Places Discovery Platform Pothole Detection System 3D Home Catalog Visualization Machine Unlearning: Comparative Analysis (Ongoing) masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Projects A selection of projects showcasing my work across full-stack development, 3D visualization, and machine learning. ← → 01 Admin & Employee Dashboard for Task Tracking Developed a task tracking system where employees submit daily work reports, and admins assign tasks and monitor employee progress. MongoDB • Next.js • React • Express • Node.js 02 Dating Places Discovery Platform Worked on a client-based internship project, developing backend APIs and admin dashboard features for a NYC-based dating places discovery platform with role-based access control. PostgreSQL • Node.js • Next.js • React • Prisma 03 Pothole Detection System Built a real-time pothole detection system using the YOLO object detection algorithm for automated road condition analysis. Machine Learning • YOLO • Object Detection 04 3D Home Catalog Visualization Designed and developed an interactive 3D virtual home"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/projects",
+          "title": "masum-3d-portfolio (part 2)",
+          "text": "n algorithm for automated road condition analysis. Machine Learning • YOLO • Object Detection 04 3D Home Catalog Visualization Designed and developed an interactive 3D virtual home using React.js, Three.js, and Blender for real-time visualization. React • Three.js • Blender 05 Machine Unlearning: Comparative Analysis (Ongoing) Performing a comparative analysis of machine unlearning algorithms on image datasets to evaluate efficiency, accuracy, and impact on model performance. Machine Learning • Machine Unlearning • Research"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "experience Home Experience Projects Skills Education Certifications Contact Home Experience Projects Skills Education Certifications Contact <span class=\"inline-block transition-transform duration-300 ease-out\">Home</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "kind": "experience",
+          "description": "Home Experience Projects Skills Education Certifications Contact"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "title": "Frontend",
+          "text": "section Frontend HTML CSS JavaScript ReactJS Vue.js Next.js Three.js jQuery WordPress",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "Frontend HTML CSS JavaScript ReactJS Vue.js Next.js Three.js jQuery WordPress"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "title": "Backend",
+          "text": "section Backend Node.js Express.js Flask REST APIs API Testing (Postman)",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "Backend Node.js Express.js Flask REST APIs API Testing (Postman)"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "title": "Database",
+          "text": "section Database MongoDB PostgreSQL SQL",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "Database MongoDB PostgreSQL SQL"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "title": "Data & ML",
+          "text": "section Data & ML Python Machine Learning Apache Spark Hadoop MERN Stack",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "Data & ML Python Machine Learning Apache Spark Hadoop MERN Stack"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/skills",
+          "title": "masum-3d-portfolio",
+          "text": "masum-3d-portfolio Skills Frontend Backend Database Data & ML masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Skills Technologies and tools I work with across the stack. Frontend HTML CSS JavaScript ReactJS Vue.js Next.js Three.js jQuery WordPress Backend Node.js Express.js Flask REST APIs API Testing (Postman) Database MongoDB PostgreSQL SQL Data & ML Python Machine Learning Apache Spark Hadoop MERN Stack"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/education",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "experience Home Experience Projects Skills Education Certifications Contact Home Experience Projects Skills Education Certifications Contact <span class=\"inline-block transition-transform duration-300 ease-out\">Home</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "kind": "experience",
+          "description": "Home Experience Projects Skills Education Certifications Contact"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/education",
+          "title": "masum-3d-portfolio",
+          "text": "masum-3d-portfolio Education M.Tech – Computer Science & Engineering B.E – Computer Engineering HSC – PCM SSC masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Education A timeline of my academic growth and learning journey. 2024 – 2026 M.Tech – Computer Science & Engineering Nirma University CGPA: 8.6 2020 – 2024 B.E – Computer Engineering SVIT Vasad CGPA: 9.21 2020 HSC – PCM Krishna Science School Percentile: 90.36 2018 SSC Shree Gujarat Vidyut Board Vidyalaya Percentile: 99.33"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "experience Home Experience Projects Skills Education Certifications Contact Home Experience Projects Skills Education Certifications Contact <span class=\"inline-block transition-transform duration-300 ease-out\">Home</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "kind": "experience",
+          "description": "Home Experience Projects Skills Education Certifications Contact"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "title": "$ completed IBM Developers Skill Network SQL Databases",
+          "text": "experience Developers Skill Network SQL Databases $ completed IBM Developers Skill Network SQL Databases",
+          "role": "Developers Skill Network SQL Databases",
+          "company": "",
+          "kind": "experience",
+          "description": "$ completed IBM Developers Skill Network SQL Databases"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "title": "$ completed Google Cloud Ready Google Cloud Platform",
+          "text": "section $ completed Google Cloud Ready Google Cloud Platform",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "$ completed Google Cloud Ready Google Cloud Platform"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "title": "$ completed Deloitte Data Analytics Job Simulation Tableau Data Analytics",
+          "text": "section $ completed Deloitte Data Analytics Job Simulation Tableau Data Analytics",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "$ completed Deloitte Data Analytics Job Simulation Tableau Data Analytics"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "title": "$ completed Python Course for Beginners Python",
+          "text": "section $ completed Python Course for Beginners Python",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "$ completed Python Course for Beginners Python"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "title": "$ completed Application of Machine Learning and Deep Learning Machine Learning Deep Learning",
+          "text": "section $ completed Application of Machine Learning and Deep Learning Machine Learning Deep Learning",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "$ completed Application of Machine Learning and Deep Learning Machine Learning Deep Learning"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "title": "$ completed Generative AI fundamentals AI",
+          "text": "section $ completed Generative AI fundamentals AI",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "$ completed Generative AI fundamentals AI"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/certifications",
+          "title": "masum-3d-portfolio",
+          "text": "masum-3d-portfolio Certifications masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Certifications certifications.log $ completed IBM Developers Skill Network SQL Databases $ completed Google Cloud Ready Google Cloud Platform $ completed Deloitte Data Analytics Job Simulation Tableau Data Analytics $ completed Python Course for Beginners Python $ completed Application of Machine Learning and Deep Learning Machine Learning Deep Learning $ completed Generative AI fundamentals AI"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/contact",
+          "title": "Home Experience Projects Skills Education Certifications Contact",
+          "text": "experience Home Experience Projects Skills Education Certifications Contact Home Experience Projects Skills Education Certifications Contact <span class=\"inline-block transition-transform duration-300 ease-out\">Home</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Experience</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Projects</span> <span class=\"inline-block transition-transform duration-300 ease-out\">Skills</span>",
+          "role": "Home Experience Projects Skills Education Certifications Contact",
+          "company": "",
+          "kind": "experience",
+          "description": "Home Experience Projects Skills Education Certifications Contact"
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/contact",
+          "title": "Connect With Me",
+          "text": "section Let’s collaborate, build, or just have a conversation.",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "Let’s collaborate, build, or just have a conversation."
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/contact",
+          "title": "I’m always open to discussing opportunities, projects, internships, or research collaborations.",
+          "text": "experience internships I’m always open to discussing opportunities, projects, internships, or research collaborations. 🔗 LinkedIn 💻 GitHub 🧠 LeetCode",
+          "role": "internships",
+          "company": "",
+          "kind": "experience",
+          "description": "I’m always open to discussing opportunities, projects, internships, or research collaborations."
+        },
+        {
+          "url": "https://masum-portfolio-green.vercel.app/contact",
+          "title": "masum-3d-portfolio",
+          "text": "masum-3d-portfolio Connect With Me masum-3d-portfolio Home Experience Projects Skills Education Certifications Contact Masum ☰ Connect With Me Let’s collaborate, build, or just have a conversation. I’m always open to discussing opportunities, projects, internships, or research collaborations. 🔗 LinkedIn 💻 GitHub 🧠 LeetCode Send Message Or email me directly at vermamasum.test@gmail.com"
+        }
+      ],
+      "topics": [
+        "masum",
+        "portfolio",
+        "verma",
+        "experience",
+        "projects",
+        "skills",
+        "education",
+        "certifications",
+        "full",
+        "stack",
+        "developer",
+        "enthusiastic",
+        "view",
+        "resume",
+        "download",
+        "mobilions",
+        "labs",
+        "software"
+      ],
+      "source": "crawl"
+    },
+    {
+      "id": "62a313a1-a6ab-4b21-b1b5-43ba2804cf59",
+      "createdAt": "2026-04-06T10:48:42.127Z",
+      "websiteUrl": "https://example.com",
+      "title": "Example Domain",
+      "summary": "Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more | Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more | Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more | Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more | Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more | Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more | Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more | Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more | Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more | Example Domain: Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more",
+      "pages": [
+        {
+          "url": "https://example.com/",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/experience",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/projects",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/skills",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/education",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/certifications",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/contact",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/about",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/portfolio",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/",
+          "title": "Example Domain",
+          "summary": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        }
+      ],
+      "sections": [
+        {
+          "url": "https://example.com/",
+          "kind": "section",
+          "title": "Example Domain",
+          "subtitle": "",
+          "role": "",
+          "company": "",
+          "description": "This domain is for use in documentation examples without needing permission. Avoid use in operations. <a href=\"https://iana.org/domains/example\">Learn more</a>",
+          "text": "Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. <a href=\"https://iana.org/domains/example\">Learn more</a>",
+          "links": []
+        }
+      ],
+      "chunks": [
+        {
+          "url": "https://example.com/",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/experience",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/projects",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/skills",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/education",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/certifications",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/contact",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/about",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/portfolio",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        },
+        {
+          "url": "https://example.com/",
+          "title": "Example Domain",
+          "text": "section This domain is for use in documentation examples without needing permission. Avoid use in operations. <a href=\"https://iana.org/domains/example\">Learn more</a>",
+          "role": "",
+          "company": "",
+          "kind": "section",
+          "description": "This domain is for use in documentation examples without needing permission. Avoid use in operations. <a href=\"https://iana.org/domains/example\">Learn more</a>"
+        },
+        {
+          "url": "https://example.com/",
+          "title": "Example Domain",
+          "text": "Example Domain Example Domain Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more"
+        }
+      ],
+      "topics": [
+        "example",
+        "domain",
+        "documentation",
+        "examples",
+        "without",
+        "needing",
+        "permission",
+        "avoid",
+        "operations",
+        "learn"
+      ],
+      "source": "crawl"
+    }
+  ]
+}

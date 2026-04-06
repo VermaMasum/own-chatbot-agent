@@ -37,6 +37,15 @@ If you enter a public website URL, the server fetches the homepage, checks `robo
 
 For websites that render content in the browser, the server also tries Playwright so it can read the rendered DOM, not just the raw HTML.
 
+The app now also keeps a local persistent database at `data/app-db.json` for:
+
+- published bots
+- crawl runs
+- chat logs
+- future user/lead storage
+
+This is a local JSON-backed database layer for now, so it works without extra installs in this workspace. You can move it to PostgreSQL later when you are ready for production SaaS.
+
 To use the old terminal flow:
 
 ```bash

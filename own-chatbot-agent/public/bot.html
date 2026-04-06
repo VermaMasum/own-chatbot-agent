@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Published Chatbot</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="bot-page">
+  <main class="bot-shell">
+    <section class="bot-hero panel">
+      <div class="bot-pill">Published chatbot</div>
+      <h1 id="botTitle">Loading chatbot...</h1>
+      <p id="botDescription">Fetching the saved chatbot profile.</p>
+      <div class="bot-meta-row">
+        <span id="botBusinessType" class="bot-meta-pill">Business type</span>
+        <span id="botTone" class="bot-meta-pill">Tone</span>
+      </div>
+    </section>
+
+    <section class="bot-panel panel">
+      <div class="sim-topbar">
+        <div>
+          <div class="sim-name" id="botName">Chatbot</div>
+          <div class="sim-meta" id="botMeta">Connected to a published bot</div>
+        </div>
+        <div class="sim-status">
+          <span class="status-dot"></span>
+          Live
+        </div>
+      </div>
+
+      <div class="preview-box bot-preview-box">
+        <div id="botChatWindow" class="chat-window" aria-live="polite"></div>
+      </div>
+
+      <form id="botChatForm" class="chat-composer">
+        <input id="botChatInput" type="text" placeholder="Ask the chatbot something..." />
+        <button type="submit">Send</button>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="/bot.js"></script>
+</body>
+</html>
