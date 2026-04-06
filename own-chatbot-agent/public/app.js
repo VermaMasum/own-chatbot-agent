@@ -11,9 +11,9 @@ const publishButton = document.getElementById("publishButton");
 const publishOutput = document.getElementById("publishOutput");
 const submitButton = form.querySelector('button[type="submit"]');
 
-let backendUrl = "";
+let backendUrl = "https://own-chatbot-agent.onrender.com";
 if (window.location.hostname.includes("github.io")) {
-  backendUrl = localStorage.getItem("chatbot_backend_url") || "";
+  backendUrl = localStorage.getItem("chatbot_backend_url") || "https://own-chatbot-agent.onrender.com";
   const notice = document.getElementById("backendNotice");
   if (notice) notice.style.display = "block";
   const btn = document.getElementById("setBackend");
