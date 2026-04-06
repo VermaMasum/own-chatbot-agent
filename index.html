@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Own Chatbot Agent</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">AI chatbot builder</div>
+      <h1>Create, publish, and share a personalized chatbot.</h1>
+      <p>Pick a business type, answer a few questions, generate the chatbot profile, then publish it to get a share link and embed code.</p>
+    </section>
+
+    <section class="grid">
+      <form id="builderForm" class="panel">
+        <div class="panel-title">Chatbot setup</div>
+
+        <label>
+          Business type
+          <select name="businessType" id="businessType"></select>
+        </label>
+
+        <label>
+          Project name
+          <input name="projectName" placeholder="My Real Estate Bot" />
+        </label>
+
+        <label>
+          Website URL
+          <input name="websiteUrl" placeholder="https://example.com" />
+        </label>
+
+        <label>
+          Main goal
+          <input name="mainGoal" placeholder="capture leads and book calls" />
+        </label>
+
+        <label>
+          Target audience
+          <input name="targetAudience" placeholder="website visitors" value="website visitors" />
+        </label>
+
+        <label>
+          Tone
+          <input name="tone" placeholder="friendly, professional, concise" />
+        </label>
+
+        <div class="row">
+          <label>
+            Capture name?
+            <select name="capturesName">
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </label>
+          <label>
+            Capture email?
+            <select name="capturesEmail">
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </label>
+          <label>
+            Capture phone?
+            <select name="capturesPhone">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          Docs or pages to learn from
+          <textarea name="uploadedDocs" rows="3" placeholder="Website pages, FAQ, policies, pricing"></textarea>
+        </label>
+
+        <label>
+          Allowed topics
+          <textarea name="allowedTopics" rows="2" placeholder="services, pricing, support"></textarea>
+        </label>
+
+        <label>
+          Blocked topics
+          <textarea name="blockedTopics" rows="2" placeholder="legal, medical, financial advice"></textarea>
+        </label>
+
+        <label>
+          Human handoff reason
+          <textarea name="handoffReason" rows="2" placeholder="complex questions or uncertain answers"></textarea>
+        </label>
+
+        <button type="submit">Generate chatbot profile</button>
+      </form>
+
+      <section class="panel preview">
+        <div class="panel-title">Live chatbot simulator</div>
+        <div class="sim-topbar">
+          <div>
+            <div class="sim-name" id="simName">Website Assistant</div>
+            <div class="sim-meta" id="simMeta">Ready to respond</div>
+          </div>
+          <div class="sim-status">
+            <span class="status-dot"></span>
+            Online
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div id="chatWindow" class="chat-window" aria-live="polite"></div>
+        </div>
+
+        <form id="chatForm" class="chat-composer">
+          <input id="chatInput" type="text" placeholder="Ask something like 'Do you offer 2BHK apartments?'" />
+          <button type="submit">Send</button>
+        </form>
+
+        <div class="quick-actions" id="quickActions"></div>
+
+        <details class="json-card" open>
+          <summary>Generated config</summary>
+          <pre id="output">{}</pre>
+        </details>
+
+        <div class="publish-card">
+          <div class="publish-header">
+            <div>
+              <div class="panel-title">Publish chatbot</div>
+              <p>Turn the generated profile into a shareable chatbot page and an embeddable widget.</p>
+            </div>
+            <button type="button" id="publishButton" class="publish-button" disabled>Publish chatbot</button>
+          </div>
+          <div id="publishOutput" class="publish-output">
+            Generate a chatbot profile first, then publish it to get a live URL and install snippet.
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
