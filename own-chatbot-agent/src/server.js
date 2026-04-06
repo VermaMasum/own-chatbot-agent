@@ -123,8 +123,8 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(port, () => {
-  console.log(`Own Chatbot Agent UI running at http://localhost:${port}`);
+server.listen(port, "0.0.0.0", () => {
+  console.log(`Own Chatbot Agent UI running at http://0.0.0.0:${port}`);
 });
 
 async function serveStatic(pathname, res) {
