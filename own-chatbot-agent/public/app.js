@@ -71,11 +71,17 @@ const localTemplates = {
   }
 };
 
-const templatesData = await loadTemplates();
-
-businessType.innerHTML = templatesData.templates
-  .map((item, index) => `<option value="${item.key}" ${index === 0 ? "selected" : ""}>${item.label}</option>`)
-  .join("");
+// Safe initialization
+(async function init() {
+  const templatesData = await loadTemplates();
+  if (businessType) {
+    businessType.innerHTML = templatesData.templates
+      .map((item, index) => `<option value="${item.key}" ${index === 0 ? "selected" : ""}>${item.label}</option>`)
+      .join("");
+    syncQuickActions(businessType.value);
+  }
+  await refreshProfile(true);
+})();
 
 const templatePrompts = {
   real_estate: [
@@ -375,11 +381,9 @@ function scrollChatToBottom() {
 
 async function loadTemplates() {
   try {
-    const path = "/api/templates";
-    const fullPath = backendUrl ? `${backendUrl.replace(/\/$/, "")}${path}` : `./${path.replace(/^\//, "")}`;
-    const response = await fetch(fullPath);
-    if (!response.ok) throw new Error("Template endpoint unavailable");
-    return await response.json();
+    const data = await callApi("/api/templates");
+    if (!data || !data.templates) throw new Error("Invalid template data");
+    return data;
   } catch {
     return {
       templates: Object.entries(localTemplates).map(([key, value]) => ({
