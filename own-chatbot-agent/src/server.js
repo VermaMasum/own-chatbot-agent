@@ -22,6 +22,19 @@ const port = Number(process.env.PORT || 3000);
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
+  // CORS Headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With,content-type");
+  res.setHeader("Access-Control-Allow-Credentials", true);
+
+  // Handle Options preflight
+  if (req.method === "OPTIONS") {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
+
   try {
     if (req.method === "GET" && url.pathname === "/api/templates") {
       return sendJson(res, 200, { templates: listTemplates() });
@@ -735,7 +748,7 @@ async function fetchWebsiteContext(websiteUrl) {
     const sections = safePages.flatMap((page) => Array.isArray(page.sections) ? page.sections : []);
 
     if (browser) {
-      await browser.close().catch(() => {});
+      await browser.close().catch(() => { });
     }
 
     return {
@@ -754,7 +767,7 @@ async function fetchWebsiteContext(websiteUrl) {
     return empty;
   } finally {
     if (browser) {
-      await browser.close().catch(() => {});
+      await browser.close().catch(() => { });
     }
   }
 }
@@ -1054,7 +1067,7 @@ async function crawlRenderedNavigation(baseUrl, browser) {
   } catch {
     // ignore navigation crawl failures
   } finally {
-    await page.close().catch(() => {});
+    await page.close().catch(() => { });
   }
 
   return pages;
@@ -1099,7 +1112,7 @@ async function clickRenderedNavigation(page, label) {
       const exactRe = new RegExp(exactStr, "i");
       const fuzzyRe = new RegExp(fuzzyStr, "i");
       const els = Array.from(document.querySelectorAll(sel));
-      
+
       for (const el of els) {
         if (exactRe.test(el.textContent)) {
           el.click();
@@ -1114,7 +1127,7 @@ async function clickRenderedNavigation(page, label) {
       }
       return false;
     }, selector, `^\\s*${escapeRegExp(label)}\\s*$`, escapeRegExp(label));
-    
+
     if (clicked) return true;
   }
 
@@ -1246,156 +1259,156 @@ async function fetchRenderedPage(url, browser = null) {
       contentType.includes("application/octet-stream") ||
       contentType.includes("application/zip")
     ) {
-      await page.close().catch(() => {});
+      await page.close().catch(() => { });
       return null;
     }
 
     let data = null;
     try {
       data = await page.evaluate(() => {
-      const title = document.title || "";
-      const description = document.querySelector('meta[name="description"]')?.getAttribute("content") || "";
-      const headings = Array.from(document.querySelectorAll("h1, h2, h3"))
-        .map((el) => (el.textContent || "").trim())
-        .filter(Boolean)
-        .slice(0, 12);
-      const text = (document.body?.innerText || document.documentElement?.innerText || "")
-        .replace(/\s+/g, " ")
-        .trim();
-      const links = Array.from(document.querySelectorAll("a[href]"))
-        .map((a) => ({
-          href: a.href || "",
-          text: (a.textContent || "").trim()
-        }))
-        .filter((link) => link.href);
-
-      return {
-        title,
-        description,
-        headings,
-        text,
-        links,
-        sections: extractStructuredSections(),
-        html: document.documentElement.outerHTML
-      };
-
-      function extractStructuredSections() {
-        const root = document.querySelector("main") || document.body || document.documentElement;
-        const candidates = Array.from(
-          root.querySelectorAll(
-            "section, article, li, [class*='card'], [class*='experience'], [class*='project'], [class*='skill'], [class*='education'], [class*='contact'], [class*='certificat']"
-          )
-        );
-        const seen = new Set();
-        const sections = [];
-
-        for (const el of candidates) {
-          if (!isVisible(el)) continue;
-          if (el.closest("nav, header, footer, aside")) continue;
-
-          const rawText = cleanInline(el.innerText || el.textContent || "");
-          if (rawText.length < 40 || rawText.length > 1200) continue;
-          if (/^(home|experience|projects|skills|education|certifications|contact)$/i.test(rawText)) continue;
-
-          const headingTexts = Array.from(el.querySelectorAll("h1, h2, h3, h4, strong, b"))
-            .map((node) => cleanInline(node.textContent || ""))
-            .filter(Boolean);
-          const heading = headingTexts[0] || "";
-          const [primary, secondary] = splitTitle(heading || rawText);
-          const paragraphTexts = Array.from(el.querySelectorAll("p, li, [class*='desc'], [class*='text'], [class*='content']"))
-            .map((node) => cleanInline(node.textContent || ""))
-            .filter((value) => value && value.length > 15 && !/^(view resume|download|view|read more|learn more)$/i.test(value));
-          const linkTexts = Array.from(el.querySelectorAll("a[href], button"))
-            .map((node) => cleanInline(node.textContent || ""))
-            .filter((value) => value && !/^(view resume|download|view|read more|learn more)$/i.test(value));
-
-          const description = cleanInline(paragraphTexts.join(" ")) || cleanInline(
-            rawText
-              .replace(heading, "")
-              .replace(/view resume|download|read more|learn more/gi, " ")
-          );
-
-          const kind = inferSectionKind(el, primary, description);
-          const role = extractRoleName(primary, secondary, description, kind);
-          const company = extractCompanyName(primary, secondary, description, kind, role);
-          const normalized = cleanInline([kind, role, company, description].filter(Boolean).join(" "));
-          if (!normalized || seen.has(normalized)) continue;
-          seen.add(normalized);
-
-          sections.push({
-            kind,
-            title: primary || heading || rawText.slice(0, 80),
-            subtitle: secondary || "",
-            role,
-            company,
-            description: description || rawText,
-            text: normalized,
-            links: linkTexts.slice(0, 4)
-          });
-        }
-
-        return sections.slice(0, 40);
-      }
-
-      function isVisible(el) {
-        const style = window.getComputedStyle(el);
-        return style && style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0";
-      }
-
-      function cleanInline(value) {
-        return String(value || "")
+        const title = document.title || "";
+        const description = document.querySelector('meta[name="description"]')?.getAttribute("content") || "";
+        const headings = Array.from(document.querySelectorAll("h1, h2, h3"))
+          .map((el) => (el.textContent || "").trim())
+          .filter(Boolean)
+          .slice(0, 12);
+        const text = (document.body?.innerText || document.documentElement?.innerText || "")
           .replace(/\s+/g, " ")
-          .replace(/[\u200B-\u200D\uFEFF]/g, "")
           .trim();
-      }
+        const links = Array.from(document.querySelectorAll("a[href]"))
+          .map((a) => ({
+            href: a.href || "",
+            text: (a.textContent || "").trim()
+          }))
+          .filter((link) => link.href);
 
-      function splitTitle(value) {
-        const text = cleanInline(value);
-        if (!text) return ["", ""];
-        const separators = [" — ", " - ", " | ", " / ", " : "];
-        for (const separator of separators) {
-          if (text.includes(separator)) {
-            const [first, ...rest] = text.split(separator);
-            return [cleanInline(first), cleanInline(rest.join(separator))];
+        return {
+          title,
+          description,
+          headings,
+          text,
+          links,
+          sections: extractStructuredSections(),
+          html: document.documentElement.outerHTML
+        };
+
+        function extractStructuredSections() {
+          const root = document.querySelector("main") || document.body || document.documentElement;
+          const candidates = Array.from(
+            root.querySelectorAll(
+              "section, article, li, [class*='card'], [class*='experience'], [class*='project'], [class*='skill'], [class*='education'], [class*='contact'], [class*='certificat']"
+            )
+          );
+          const seen = new Set();
+          const sections = [];
+
+          for (const el of candidates) {
+            if (!isVisible(el)) continue;
+            if (el.closest("nav, header, footer, aside")) continue;
+
+            const rawText = cleanInline(el.innerText || el.textContent || "");
+            if (rawText.length < 40 || rawText.length > 1200) continue;
+            if (/^(home|experience|projects|skills|education|certifications|contact)$/i.test(rawText)) continue;
+
+            const headingTexts = Array.from(el.querySelectorAll("h1, h2, h3, h4, strong, b"))
+              .map((node) => cleanInline(node.textContent || ""))
+              .filter(Boolean);
+            const heading = headingTexts[0] || "";
+            const [primary, secondary] = splitTitle(heading || rawText);
+            const paragraphTexts = Array.from(el.querySelectorAll("p, li, [class*='desc'], [class*='text'], [class*='content']"))
+              .map((node) => cleanInline(node.textContent || ""))
+              .filter((value) => value && value.length > 15 && !/^(view resume|download|view|read more|learn more)$/i.test(value));
+            const linkTexts = Array.from(el.querySelectorAll("a[href], button"))
+              .map((node) => cleanInline(node.textContent || ""))
+              .filter((value) => value && !/^(view resume|download|view|read more|learn more)$/i.test(value));
+
+            const description = cleanInline(paragraphTexts.join(" ")) || cleanInline(
+              rawText
+                .replace(heading, "")
+                .replace(/view resume|download|read more|learn more/gi, " ")
+            );
+
+            const kind = inferSectionKind(el, primary, description);
+            const role = extractRoleName(primary, secondary, description, kind);
+            const company = extractCompanyName(primary, secondary, description, kind, role);
+            const normalized = cleanInline([kind, role, company, description].filter(Boolean).join(" "));
+            if (!normalized || seen.has(normalized)) continue;
+            seen.add(normalized);
+
+            sections.push({
+              kind,
+              title: primary || heading || rawText.slice(0, 80),
+              subtitle: secondary || "",
+              role,
+              company,
+              description: description || rawText,
+              text: normalized,
+              links: linkTexts.slice(0, 4)
+            });
           }
-        }
-        return [text, ""];
-      }
 
-      function inferSectionKind(el, title, description) {
-        const blob = `${el.className || ""} ${title || ""} ${description || ""}`.toLowerCase();
-        if (/experience|work|career|intern|developer|engineer/.test(blob)) return "experience";
-        if (/project|portfolio|built|created|developed/.test(blob)) return "project";
-        if (/skill|stack|tech|technology/.test(blob)) return "skill";
-        if (/education|school|college|university|degree/.test(blob)) return "education";
-        if (/certif|award/.test(blob)) return "certification";
-        if (/contact|email|phone|reach/.test(blob)) return "contact";
-        return "section";
-      }
-
-      function extractRoleName(primary, secondary, description, kind) {
-        if (kind !== "experience") return "";
-        const candidates = [primary, secondary, description].filter(Boolean);
-        for (const candidate of candidates) {
-          const match = candidate.match(/(?:full stack developer|software engineer|frontend developer|backend developer|developer|engineer|intern)[^,.;\n]*/i);
-          if (match) return cleanInline(match[0]);
+          return sections.slice(0, 40);
         }
-        if (primary) return cleanInline(primary);
-        return "";
-      }
 
-      function extractCompanyName(primary, secondary, description) {
-        const combined = [primary, secondary, description].filter(Boolean).join(" ");
-        const companyPatterns = [
-          /(?:at|@|for)\s+([A-Z][A-Za-z0-9&.\-() ]{2,80})/i,
-          /([A-Z][A-Za-z0-9&.\-() ]{2,80})\s+[—\-|]\s+(?:full stack developer|software engineer|frontend developer|backend developer|developer|engineer|intern)/i
-        ];
-        for (const pattern of companyPatterns) {
-          const match = combined.match(pattern);
-          if (match && match[1]) return cleanInline(match[1]);
+        function isVisible(el) {
+          const style = window.getComputedStyle(el);
+          return style && style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0";
         }
-        return "";
-      }
+
+        function cleanInline(value) {
+          return String(value || "")
+            .replace(/\s+/g, " ")
+            .replace(/[\u200B-\u200D\uFEFF]/g, "")
+            .trim();
+        }
+
+        function splitTitle(value) {
+          const text = cleanInline(value);
+          if (!text) return ["", ""];
+          const separators = [" — ", " - ", " | ", " / ", " : "];
+          for (const separator of separators) {
+            if (text.includes(separator)) {
+              const [first, ...rest] = text.split(separator);
+              return [cleanInline(first), cleanInline(rest.join(separator))];
+            }
+          }
+          return [text, ""];
+        }
+
+        function inferSectionKind(el, title, description) {
+          const blob = `${el.className || ""} ${title || ""} ${description || ""}`.toLowerCase();
+          if (/experience|work|career|intern|developer|engineer/.test(blob)) return "experience";
+          if (/project|portfolio|built|created|developed/.test(blob)) return "project";
+          if (/skill|stack|tech|technology/.test(blob)) return "skill";
+          if (/education|school|college|university|degree/.test(blob)) return "education";
+          if (/certif|award/.test(blob)) return "certification";
+          if (/contact|email|phone|reach/.test(blob)) return "contact";
+          return "section";
+        }
+
+        function extractRoleName(primary, secondary, description, kind) {
+          if (kind !== "experience") return "";
+          const candidates = [primary, secondary, description].filter(Boolean);
+          for (const candidate of candidates) {
+            const match = candidate.match(/(?:full stack developer|software engineer|frontend developer|backend developer|developer|engineer|intern)[^,.;\n]*/i);
+            if (match) return cleanInline(match[0]);
+          }
+          if (primary) return cleanInline(primary);
+          return "";
+        }
+
+        function extractCompanyName(primary, secondary, description) {
+          const combined = [primary, secondary, description].filter(Boolean).join(" ");
+          const companyPatterns = [
+            /(?:at|@|for)\s+([A-Z][A-Za-z0-9&.\-() ]{2,80})/i,
+            /([A-Z][A-Za-z0-9&.\-() ]{2,80})\s+[—\-|]\s+(?:full stack developer|software engineer|frontend developer|backend developer|developer|engineer|intern)/i
+          ];
+          for (const pattern of companyPatterns) {
+            const match = combined.match(pattern);
+            if (match && match[1]) return cleanInline(match[1]);
+          }
+          return "";
+        }
       });
     } catch {
       data = null;
@@ -1417,12 +1430,12 @@ async function fetchRenderedPage(url, browser = null) {
 
     const renderedText = cleanText(data.text || "");
     if (looksLikeBinaryText(renderedText) || hasPdfNoise(renderedText)) {
-      await page.close().catch(() => {});
+      await page.close().catch(() => { });
       return null;
     }
 
     if (isNotFoundText(data.title, renderedText)) {
-      await page.close().catch(() => {});
+      await page.close().catch(() => { });
       return null;
     }
 
@@ -1446,23 +1459,23 @@ async function fetchRenderedPage(url, browser = null) {
       ),
       links: Array.isArray(data.links)
         ? data.links
-            .map((link) => ({
-              href: link.href,
-              text: cleanText(link.text || "")
-            }))
-            .filter((link) => link.href)
+          .map((link) => ({
+            href: link.href,
+            text: cleanText(link.text || "")
+          }))
+          .filter((link) => link.href)
         : [],
       sections: Array.isArray(data.sections)
         ? data.sections
-            .map((section) => normalizeSection(section, url))
-            .filter(Boolean)
+          .map((section) => normalizeSection(section, url))
+          .filter(Boolean)
         : []
     };
   } catch {
     return null;
   } finally {
     if (page) {
-      await page.close().catch(() => {});
+      await page.close().catch(() => { });
     }
   }
 }
@@ -1572,7 +1585,7 @@ function discoverRelevantUrls(baseUrl, source) {
     "projects", "resume", "testimonials", "blog", "articles",
     "news", "resources", "docs", "documentation", "support"
   ];
-  
+
   const keywordLinks = new Set();
   const otherLinks = new Set();
 
@@ -1737,25 +1750,25 @@ function buildWebsiteChunks(pages) {
     .flatMap((page) => {
       const sectionChunks = Array.isArray(page.sections)
         ? page.sections.map((section) => ({
-            url: page.url,
-            title: section.title || section.role || page.title || page.url,
-            text: cleanText(
-              [
-                section.kind,
-                section.role,
-                section.company,
-                section.subtitle,
-                section.description,
-                ...(section.links || [])
-              ]
-                .filter(Boolean)
-                .join(" ")
-            ),
-            role: section.role || "",
-            company: section.company || "",
-            kind: section.kind || "section",
-            description: section.description || ""
-          }))
+          url: page.url,
+          title: section.title || section.role || page.title || page.url,
+          text: cleanText(
+            [
+              section.kind,
+              section.role,
+              section.company,
+              section.subtitle,
+              section.description,
+              ...(section.links || [])
+            ]
+              .filter(Boolean)
+              .join(" ")
+          ),
+          role: section.role || "",
+          company: section.company || "",
+          kind: section.kind || "section",
+          description: section.description || ""
+        }))
         : [];
 
       const text = cleanText(

@@ -1,17 +1,26 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Own Chatbot Agent</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
+
 <body>
   <main class="shell">
     <section class="hero">
       <div class="eyebrow">AI chatbot builder</div>
       <h1>Create, publish, and share a personalized chatbot.</h1>
-      <p>Pick a business type, answer a few questions, generate the chatbot profile, then publish it to get a share link and embed code.</p>
+      <p>Pick a business type, answer a few questions, generate the chatbot profile, then publish it to get a share link
+        and embed code.</p>
+      <div id="backendNotice"
+        style="display:none; margin-top: 1rem; padding: 0.5rem; background: #1a243e; border: 1px solid #7db3ff; border-radius: 8px; font-size: 0.9rem;">
+        Running on GitHub Pages. <button id="setBackend"
+          style="background: none; border: none; color: #7db3ff; text-decoration: underline; cursor: pointer; padding: 0;">Configure
+          backend URL</button> to enable AI.
+      </div>
     </section>
 
     <section class="grid">
@@ -142,4 +151,5 @@
 
   <script type="module" src="./app.js"></script>
 </body>
+
 </html>

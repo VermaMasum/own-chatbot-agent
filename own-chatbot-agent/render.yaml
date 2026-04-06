@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: own-chatbot-agent-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node src/index.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+    disk:
+      name: db-data
+      mountPath: /data
+      sizeGB: 1

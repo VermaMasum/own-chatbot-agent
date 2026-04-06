@@ -11,6 +11,23 @@ const publishButton = document.getElementById("publishButton");
 const publishOutput = document.getElementById("publishOutput");
 const submitButton = form.querySelector('button[type="submit"]');
 
+let backendUrl = "";
+if (window.location.hostname.includes("github.io")) {
+  backendUrl = localStorage.getItem("chatbot_backend_url") || "";
+  const notice = document.getElementById("backendNotice");
+  if (notice) notice.style.display = "block";
+  const btn = document.getElementById("setBackend");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const url = prompt("Enter your Render/Railway backend URL (e.g., https://my-bot.onrender.com):", backendUrl);
+      if (url !== null) {
+        localStorage.setItem("chatbot_backend_url", url.trim());
+        window.location.reload();
+      }
+    });
+  }
+}
+
 let currentProfile = null;
 let currentBot = null;
 let conversation = [];
@@ -220,9 +237,8 @@ async function refreshProfile(isInitial = false) {
       })) || buildLocalProfile(payload);
 
     if (!Array.isArray(data.websiteChunks) || data.websiteChunks.length === 0) {
-      simMeta.textContent = `${data.businessType} | ${data.tone} | ${
-        data.provider === "static" ? "demo mode" : "no readable website content found"
-      }`;
+      simMeta.textContent = `${data.businessType} | ${data.tone} | ${data.provider === "static" ? "demo mode" : "no readable website content found"
+        }`;
     }
 
     currentProfile = data;
@@ -374,13 +390,15 @@ async function loadTemplates() {
 
 async function callApi(path, options) {
   try {
-    const response = await fetch(path, options);
+    const fullPath = backendUrl ? `${backendUrl.replace(/\/$/, "")}${path}` : path;
+    const response = await fetch(fullPath, options);
     const data = await response.json();
     if (!response.ok || data?.error) {
       throw new Error(data?.error || `Request failed with status ${response.status}`);
     }
     return data;
-  } catch {
+  } catch (error) {
+    console.error("API Call failed:", error);
     return null;
   }
 }
@@ -480,9 +498,8 @@ function generateLocalReply(message, profile, history) {
   }
 
   const lastUserMessage = [...history].reverse().find((item) => item.role === "user")?.content;
-  return `I’m in demo mode right now, so I can simulate helpful replies for ${
-    profile?.businessType || "this business"
-  }. Ask me about ${profile?.goals?.[0] || "services"} or "${lastUserMessage || "your question"}".`;
+  return `I’m in demo mode right now, so I can simulate helpful replies for ${profile?.businessType || "this business"
+    }. Ask me about ${profile?.goals?.[0] || "services"} or "${lastUserMessage || "your question"}".`;
 }
 
 function compact(values) {
