@@ -375,7 +375,9 @@ function scrollChatToBottom() {
 
 async function loadTemplates() {
   try {
-    const response = await fetch("./api/templates");
+    const path = "/api/templates";
+    const fullPath = backendUrl ? `${backendUrl.replace(/\/$/, "")}${path}` : `./${path.replace(/^\//, "")}`;
+    const response = await fetch(fullPath);
     if (!response.ok) throw new Error("Template endpoint unavailable");
     return await response.json();
   } catch {
@@ -391,7 +393,10 @@ async function loadTemplates() {
 async function callApi(path, options) {
   try {
     const fullPath = backendUrl ? `${backendUrl.replace(/\/$/, "")}${path}` : path;
-    const response = await fetch(fullPath, options);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const response = await fetch(fullPath, { ...options, signal: controller.signal });
+    clearTimeout(timeoutId);
     const data = await response.json();
     if (!response.ok || data?.error) {
       throw new Error(data?.error || `Request failed with status ${response.status}`);
