@@ -55,13 +55,24 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && url.pathname === "/api/build") {
       const body = await readJsonBody(req);
       const empty = { title: "", summary: "", pages: [], sections: [], chunks: [], topics: [] };
-      const deadline = new Promise((resolve) => setTimeout(() => resolve(null), 35000));
+      const puppeteerDisabled = process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD === "true";
 
-      // Try puppeteer first (full JS rendering), fall back to fetch-based scraper
-      let websiteContext = await Promise.race([getWebsiteContext(body.websiteUrl, body.forceRefresh), deadline]);
-      if (!websiteContext || (!websiteContext.title && !websiteContext.summary && !websiteContext.chunks?.length)) {
-        websiteContext = await Promise.race([getSimpleWebsiteContext(body.websiteUrl), new Promise((r) => setTimeout(() => r(null), 20000))]);
+      let websiteContext = null;
+
+      if (!puppeteerDisabled) {
+        // Local: try puppeteer first (full JS rendering), 35s limit
+        const deadline = new Promise((resolve) => setTimeout(() => resolve(null), 35000));
+        websiteContext = await Promise.race([getWebsiteContext(body.websiteUrl, body.forceRefresh), deadline]);
       }
+
+      // Render (or puppeteer failed): use fast fetch-based scraper
+      if (!websiteContext || (!websiteContext.title && !websiteContext.summary && !websiteContext.chunks?.length)) {
+        websiteContext = await Promise.race([
+          getSimpleWebsiteContext(body.websiteUrl),
+          new Promise((r) => setTimeout(() => r(null), 25000))
+        ]);
+      }
+
       if (!websiteContext || (!websiteContext.title && !websiteContext.summary && !websiteContext.chunks?.length)) {
         websiteContext = empty;
       }
