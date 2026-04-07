@@ -820,15 +820,17 @@ function formatWebsiteContext(sections = [], chunks = []) {
       section.url ||
       "Website section";
     const parts = [];
-    if (section.kind) parts.push(`kind: ${section.kind}`);
     if (section.role) parts.push(`role: ${section.role}`);
     if (section.company) parts.push(`company: ${section.company}`);
     if (section.description)
-      parts.push(
-        `description: ${limitText(cleanText(section.description), 260)}`,
-      );
-    if (!parts.length && section.text)
-      parts.push(limitText(cleanText(section.text), 260));
+      parts.push(`description: ${limitText(cleanText(section.description), 260)}`);
+    // Always include section.text if it has more content than just the title
+    const sectionText = cleanText(section.text || "");
+    const titleClean = cleanText(title);
+    if (sectionText && sectionText !== titleClean && sectionText.length > titleClean.length + 3) {
+      parts.push(limitText(sectionText, 400));
+    }
+    if (!parts.length) continue; // skip empty sections (no content)
     lines.push(`- ${title}: ${parts.join(" | ")}`);
   }
 
