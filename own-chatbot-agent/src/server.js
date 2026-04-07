@@ -452,42 +452,26 @@ async function generateChatReply(body) {
 
 function buildChatSystemPrompt(profile, websiteContext = "") {
   const projectName = profile.projectName || "Website Assistant";
-  const businessType = profile.businessType || "General Business";
   const tone = profile.tone || "friendly and professional";
-  const goals = Array.isArray(profile.goals)
-    ? profile.goals.join(", ")
-    : "answer website questions";
-  const knowledgeSources = Array.isArray(profile.knowledgeSources)
-    ? profile.knowledgeSources.join(", ")
-    : "website content";
-  const allowedTopics = Array.isArray(profile.allowedTopics)
-    ? profile.allowedTopics.join(", ")
-    : "services, pricing, support";
-  const blockedTopics = Array.isArray(profile.blockedTopics)
-    ? profile.blockedTopics.join(", ")
-    : "legal, medical, financial advice";
-  const handoffConditions = Array.isArray(profile.handoffConditions)
-    ? profile.handoffConditions.join(" | ")
-    : "uncertain answers";
+  const websiteTitle = profile.websiteTitle || "";
+  const websiteSummary = profile.websiteSummary
+    ? profile.websiteSummary.slice(0, 600)
+    : "";
 
   return [
-    `You are the chatbot for ${projectName}.`,
-    `Business type: ${businessType}.`,
+    `You are the AI assistant for "${projectName}".`,
     `Tone: ${tone}.`,
-    `Main goals: ${goals}.`,
-    `Knowledge sources available: ${knowledgeSources}.`,
-    `Allowed topics: ${allowedTopics}.`,
-    `Blocked topics: ${blockedTopics}.`,
-    `Hand off to a human when: ${handoffConditions}.`,
+    websiteTitle ? `Website: ${websiteTitle}.` : "",
+    websiteSummary ? `About this website: ${websiteSummary}.` : "",
     websiteContext
-      ? `Website excerpts:\n${websiteContext}`
-      : "Website excerpts: none provided.",
-    "Provide accurate, direct, and factual answers based strictly on the website excerpts.",
-    "Do NOT add conversational fluff or human-like filler words.",
-    "When the question asks about a role, position, project, skill, or contact detail, quote the exact website excerpt directly.",
-    "Do not mention that you are an AI model.",
-    "If the answer cannot be found in the website excerpts, reply exactly with: 'I do not have that information at this time.'",
-  ].join("\n");
+      ? `Relevant website content:\n${websiteContext}`
+      : "Relevant website content: none available.",
+    "Answer ONLY using the website content above.",
+    "Be direct and factual. Quote exact details — names, titles, dates, technologies — as they appear.",
+    "If asked about skills, list the skills. If asked about certifications, list the certifications. If asked about projects, list the projects.",
+    "Do NOT mention your setup, goals, or business type. Do NOT say 'I am an AI'.",
+    "If the answer is not in the website content, say: 'I don't have that detail — please check the website directly.'",
+  ].filter(Boolean).join("\n");
 }
 
 function fallbackReply(message, profile, relevantChunks = []) {
@@ -548,10 +532,22 @@ function fallbackReply(message, profile, relevantChunks = []) {
   }
 
   if (containsAny(text, ["contact", "phone", "email", "reach", "support"])) {
-    return `Yes, I can capture contact details and route the conversation to a human when needed. That is useful for ${projectName}.${websiteUrl}`;
+    return buildAnswerFromChunks(relevantChunks, text) || `I don't have specific contact details loaded. Please check the website directly.`;
   }
 
-  return `I am set up to help with ${goals.slice(0, 3).join(", ") || "website questions"} for ${projectName}. If you want a smarter response, connect the live website content and an API key.${websiteUrl}`;
+  if (containsAny(text, ["certif", "certificate", "certification", "ibm", "google cloud", "deloitte"])) {
+    return buildAnswerFromChunks(relevantChunks, text) || `I don't have the full certifications list loaded. Please check the website directly.`;
+  }
+
+  if (containsAny(text, ["skill", "technology", "tech stack", "language", "framework", "tools"])) {
+    return buildAnswerFromChunks(relevantChunks, text) || `I don't have the full skills list loaded. Please check the website directly.`;
+  }
+
+  if (containsAny(text, ["education", "degree", "university", "college", "study", "academic"])) {
+    return buildAnswerFromChunks(relevantChunks, text) || `I don't have education details loaded. Please check the website directly.`;
+  }
+
+  return buildAnswerFromChunks(relevantChunks, text) || `I don't have that information available. Please check the website directly.`;
 }
 
 function containsAny(text, keywords) {
@@ -572,24 +568,13 @@ function selectRelevantChunks(chunks, query, limit = 40) {
       for (const token of queryTokens) {
         if (text.includes(token)) score += token.length >= 6 ? 2 : 1;
       }
-      if (
-        /experience|work|career|job/.test(query.toLowerCase()) &&
-        /experience|work|career/.test(text)
-      ) {
-        score += 5;
-      }
-      if (
-        /project|projects|portfolio/.test(query.toLowerCase()) &&
-        /project|portfolio/.test(text)
-      ) {
-        score += 5;
-      }
-      if (
-        /contact|email|phone|reach/.test(query.toLowerCase()) &&
-        /contact/.test(text)
-      ) {
-        score += 5;
-      }
+      const q = query.toLowerCase();
+      if (/experience|work|career|job/.test(q) && /experience|work|career/.test(text)) score += 5;
+      if (/project|portfolio|built|made/.test(q) && /project|portfolio/.test(text)) score += 5;
+      if (/contact|email|phone|reach/.test(q) && /contact|email|linkedin|github/.test(text)) score += 5;
+      if (/certif|certificate|certification/.test(q) && /certif|ibm|google cloud|deloitte|coursera|udemy/.test(text)) score += 8;
+      if (/skill|technolog|stack|language|framework/.test(q) && /skill|react|node|python|javascript|mongodb|sql/.test(text)) score += 8;
+      if (/education|degree|study|academic|university|college|m\.tech|b\.e|btech|mtech/.test(q) && /education|degree|university|college|m\.tech|b\.e/.test(text)) score += 8;
       return { chunk, score };
     })
     .filter((item) => item.score > 0)
@@ -623,24 +608,12 @@ function selectRelevantSections(sections, query, limit = 30) {
         if (text.includes(token)) score += token.length >= 6 ? 2 : 1;
       }
 
-      if (
-        /experience|work|career|job|role/.test(queryLower) &&
-        /experience|role|career|job|work/.test(text)
-      ) {
-        score += 6;
-      }
-      if (
-        /project|projects|portfolio|built|made/.test(queryLower) &&
-        /project|portfolio/.test(text)
-      ) {
-        score += 5;
-      }
-      if (
-        /contact|email|phone|reach/.test(queryLower) &&
-        /contact/.test(text)
-      ) {
-        score += 5;
-      }
+      if (/experience|work|career|job|role/.test(queryLower) && /experience|role|career|job|work/.test(text)) score += 6;
+      if (/project|projects|portfolio|built|made/.test(queryLower) && /project|portfolio/.test(text)) score += 5;
+      if (/contact|email|phone|reach/.test(queryLower) && /contact|email|linkedin|github/.test(text)) score += 6;
+      if (/certif|certificate|certification/.test(queryLower) && /certif|ibm|google cloud|deloitte|coursera/.test(text)) score += 8;
+      if (/skill|technolog|stack|language|framework/.test(queryLower) && /skill|react|node|python|javascript|mongodb/.test(text)) score += 8;
+      if (/education|degree|study|academic|university|college|m\.tech|b\.e/.test(queryLower) && /education|degree|university|m\.tech|b\.e/.test(text)) score += 8;
 
       return { section, score };
     })
