@@ -20,7 +20,7 @@ const publicDir = resolve(rootDir, "public");
 await loadEnvFile(resolve(rootDir, ".env"));
 
 const groqBaseUrl = "https://api.groq.com/openai/v1";
-const groqModel = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+const groqModel = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 const websiteContextCache = new Map();
 
 const port = Number(process.env.PORT || 3000);
@@ -363,10 +363,10 @@ async function generateChatReply(body) {
       relevantChunks.length ? relevantChunks : allChunks,
       userMessage,
     );
-  const websiteContext = formatWebsiteContext(
-    relevantSections.length ? relevantSections : allSections.slice(0, 30),
-    relevantChunks.length ? relevantChunks : allChunks.slice(0, 50),
-  );
+  // Limit context sent to Groq to avoid token limits (429)
+  const contextSections = (relevantSections.length ? relevantSections : allSections).slice(0, 8);
+  const contextChunks = (relevantChunks.length ? relevantChunks : allChunks).slice(0, 6);
+  const websiteContext = formatWebsiteContext(contextSections, contextChunks);
 
   if (!userMessage) {
     return { reply: "Please type a message first." };
@@ -416,37 +416,28 @@ async function generateChatReply(body) {
       body: JSON.stringify({
         model: groqModel,
         messages,
-        temperature: 0.7,
-        max_tokens: 800,
+        temperature: 0.4,
+        max_tokens: 400,
       }),
     }).finally(() => clearTimeout(timeout));
 
     if (!response.ok) {
-      return {
-        reply: fallbackReply(userMessage, profile, relevantChunks),
-        error: `Groq request failed with status ${response.status}`,
-        provider: "fallback",
-      };
+      const bestReply = directAnswer || fallbackReply(userMessage, profile, relevantChunks);
+      return { reply: bestReply, error: `Groq request failed with status ${response.status}`, provider: "fallback" };
     }
 
     const data = await response.json();
     const reply = data?.choices?.[0]?.message?.content?.trim();
 
     if (!reply) {
-      return {
-        reply: fallbackReply(userMessage, profile, relevantChunks),
-        error: "Groq returned an empty response",
-        provider: "fallback",
-      };
+      const bestReply = directAnswer || fallbackReply(userMessage, profile, relevantChunks);
+      return { reply: bestReply, error: "Groq returned an empty response", provider: "fallback" };
     }
 
     return { reply, provider: "groq" };
   } catch (error) {
-    return {
-      reply: fallbackReply(userMessage, profile, relevantChunks),
-      error: error?.message || "Groq request failed",
-      provider: "fallback",
-    };
+    const bestReply = directAnswer || fallbackReply(userMessage, profile, relevantChunks);
+    return { reply: bestReply, error: error?.message || "Groq request failed", provider: "fallback" };
   }
 }
 
@@ -828,7 +819,7 @@ function formatWebsiteContext(sections = [], chunks = []) {
 
   for (const chunk of chunks) {
     const title = chunk.title || chunk.url || "Website page";
-    const text = limitText(cleanText(chunk.text || ""), 700);
+    const text = limitText(cleanText(chunk.text || ""), 300);
     lines.push(`- ${title}: ${text}`);
   }
 
