@@ -6,7 +6,8 @@ import { randomUUID } from "node:crypto";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = resolve(__dirname, "..");
-const dbPath = resolve(rootDir, "data", "app-db.json");
+const dataDir = process.env.DATA_DIR ? resolve(process.env.DATA_DIR) : resolve(rootDir, "data");
+const dbPath = resolve(dataDir, "app-db.json");
 
 let writeQueue = Promise.resolve();
 
