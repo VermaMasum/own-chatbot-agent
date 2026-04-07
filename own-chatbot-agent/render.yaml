@@ -3,6 +3,7 @@ services:
     name: own-chatbot-agent-backend
     env: node
     plan: free
+    rootDir: own-chatbot-agent
     buildCommand: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
     startCommand: node src/index.js
     envVars:
