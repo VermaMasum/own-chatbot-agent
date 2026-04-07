@@ -12,9 +12,9 @@ const publishOutput = document.getElementById("publishOutput");
 const submitButton = document.getElementById("generateBtn");
 
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-let backendUrl = isLocal ? "" : "https://own-chatbot-agent.onrender.com";
+let backendUrl = isLocal ? "" : "https://own-chatbot-agent-2wb7.onrender.com";
 if (window.location.hostname.includes("github.io")) {
-  backendUrl = localStorage.getItem("chatbot_backend_url") || "https://own-chatbot-agent.onrender.com";
+  backendUrl = localStorage.getItem("chatbot_backend_url") || "https://own-chatbot-agent-2wb7.onrender.com";
   const notice = document.getElementById("backendNotice");
   if (notice) notice.style.display = "block";
   const btn = document.getElementById("setBackend");
