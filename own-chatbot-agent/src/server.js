@@ -1893,21 +1893,40 @@ async function fetchSpaBundleContent(html, pageUrl) {
     const fullBundle = bundles.join(" ");
     if (!fullBundle) return null;
 
-    // Extract text from React JSX children patterns
+    // Extract text from React JSX children patterns and structured data objects
     const seen = new Set();
     const lines = [];
 
-    for (const m of fullBundle.matchAll(/children:"([^"]{10,500})"/g)) {
-      const t = m[1].trim();
-      if (!seen.has(t) && !/className|style|onClick|onChange|useState|useEffect|http|<[a-z]/.test(t)) {
-        seen.add(t);
-        lines.push(t);
-      }
+    const BAD = /className|style|onClick|onChange|onSubmit|useState|useEffect|useRef|import|export|require|module|webpack|__vite|http[s]?:|<[a-z]|\$\{|=>|function|const |let |var |return |\.jsx|\.tsx|\.css/;
+
+    function addLine(t) {
+      t = t.trim();
+      if (t.length < 2) return;
+      if (seen.has(t)) return;
+      if (BAD.test(t)) return;
+      seen.add(t);
+      lines.push(t);
     }
-    // Also extract from aria-label, placeholder, alt text
-    for (const m of fullBundle.matchAll(/(?:aria-label|placeholder|alt):"([^"]{10,200})"/g)) {
+
+    // children:"..." — JSX text nodes
+    for (const m of fullBundle.matchAll(/children:"([^"]{3,500})"/g)) addLine(m[1]);
+
+    // Structured data object properties (portfolio/resume data patterns)
+    const dataProps = "title|name|label|text|heading|description|summary|bio|about|role|position|company|employer|organization|institution|degree|field|major|program|school|university|college|certificate|certification|course|project|skill|technology|stack|tech|email|phone|mobile|contact|location|address|city|country|year|date|duration|period|from|to|start|end|achievement|responsibility|responsibility|detail|highlight";
+    for (const m of fullBundle.matchAll(new RegExp(`(?:${dataProps}):"([^"]{2,500})"`, "g"))) addLine(m[1]);
+
+    // Single-quoted string property values
+    for (const m of fullBundle.matchAll(new RegExp(`(?:${dataProps}):'([^']{2,500})'`, "g"))) addLine(m[1]);
+
+    // aria-label, placeholder, alt text
+    for (const m of fullBundle.matchAll(/(?:aria-label|placeholder|alt):"([^"]{5,200})"/g)) addLine(m[1]);
+
+    // String array items (likely skill lists, tech stacks, etc.) — quoted strings 3-80 chars in array context
+    for (const m of fullBundle.matchAll(/\["([^"]{3,80})"/g)) addLine(m[1]);
+    for (const m of fullBundle.matchAll(/,"([^"]{3,80})"/g)) {
+      // Only if it looks like a plain word/phrase, not a CSS/JS token
       const t = m[1].trim();
-      if (!seen.has(t)) { seen.add(t); lines.push(t); }
+      if (t.length >= 3 && !BAD.test(t) && /^[A-Za-z]/.test(t)) addLine(t);
     }
 
     if (!lines.length) return null;
@@ -1966,12 +1985,32 @@ async function fetchStaticPage(url) {
       const headings = lines.filter(l => l.length < 120);
       const paragraphs = lines.filter(l => l.length >= 40);
       const summaryParts = [details.description, ...headings.slice(0, 20), ...paragraphs.slice(0, 15)].filter(Boolean);
+
+      // Group lines by heading: each heading gets the lines that follow until next heading
+      const sections = [];
+      let currentHeading = null;
+      let currentLines = [];
+      for (const line of lines) {
+        if (line.length < 120 && /^[A-Z]/.test(line)) {
+          if (currentHeading) {
+            sections.push({ title: currentHeading, text: [currentHeading, ...currentLines].join(" "), kind: "section" });
+          }
+          currentHeading = line;
+          currentLines = [];
+        } else {
+          currentLines.push(line);
+        }
+      }
+      if (currentHeading) {
+        sections.push({ title: currentHeading, text: [currentHeading, ...currentLines].join(" "), kind: "section" });
+      }
+
       details = {
         ...details,
         text: spaText,
         headings: headings.slice(0, 30),
         summary: limitText(summaryParts.join(" "), 5000),
-        sections: headings.slice(0, 20).map(h => ({ title: h, text: h, kind: "section" })),
+        sections: sections.slice(0, 30),
       };
     }
   }
@@ -2279,11 +2318,13 @@ function buildWebsiteChunks(pages) {
             title: section.title || section.role || page.title || page.url,
             text: cleanText(
               [
-                section.kind,
+                section.text,
+                section.description,
+                section.title,
                 section.role,
                 section.company,
                 section.subtitle,
-                section.description,
+                section.kind !== "section" ? section.kind : null,
                 ...(section.links || []),
               ]
                 .filter(Boolean)
