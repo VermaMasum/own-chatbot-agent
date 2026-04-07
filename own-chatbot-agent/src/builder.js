@@ -1,23 +1,42 @@
 import { templates } from "./templates.js";
 
+// Patterns that indicate a chunk is Three.js/React/WebGL internals rather than real content
+const NOISE_PATTERNS = [
+  /uniform\s+(mat4|vec3|sampler)/i,
+  /attribute\s+(vec3|vec4|mat4)/i,
+  /strokeDasharray|strokeDashoffset|strokeLinecap|strokeLinejoin/i,
+  /morphTarget|skinIndex|skinWeight|boneTexture|morphTexture/i,
+  /colorInterpolation|dominantBaseline|floodColor|glyphName|horizAdvX/i,
+  /kernelMatrix|stdDeviation|tableValues|pathLength|startOffset/i,
+  /CubemapFromEquirect|BackgroundCubeMaterial|PMREMGGXConvolution|SphericalGaussianBlur|EquirectangularToCubeUV/,
+  /bindMatrix|boneTexture|batchingTexture|batchingIdTexture/i,
+  /onTapStart|onTapCancel|onPanStart|onPanSessionStart|onPanEnd|onViewportEnter/,
+  /LayoutAnimationStart|LayoutAnimationComplete|BeforeLayoutMeasure|LayoutMeasure/,
+  /unicodeBidi|unicodeRange|unitsPerEm|vAlphabetic|vHanging|vIdeographic/i
+];
+
+function isNoisyChunk(chunk) {
+  const text = chunk.text || "";
+  return NOISE_PATTERNS.some((p) => p.test(text));
+}
+
 export function buildChatbotProfile(answers) {
   const template = templates[answers.businessType] ?? templates.generic;
+
+  // Only keep chunks that are not library-internal noise
+  const cleanChunks = Array.isArray(answers.websiteChunks)
+    ? answers.websiteChunks.filter((c) => !isNoisyChunk(c))
+    : [];
+
   const knowledgeSources = compact([
     answers.websiteUrl && `Website: ${answers.websiteUrl}`,
     answers.websiteTitle && `Website title: ${answers.websiteTitle}`,
     answers.websiteSummary && `Website summary: ${answers.websiteSummary}`,
-    ...(Array.isArray(answers.websiteChunks)
-      ? answers.websiteChunks.map((chunk) => `Chunk: ${chunk.title || chunk.url} - ${chunk.text || ""}`.trim())
-      : []),
+    ...cleanChunks.map((chunk) => `Chunk: ${chunk.title || chunk.url} - ${chunk.text || ""}`.trim()),
     ...(Array.isArray(answers.websiteSections)
       ? answers.websiteSections.map((section) => {
-          const pieces = [
-            section.kind && `kind=${section.kind}`,
-            section.role && `role=${section.role}`,
-            section.company && `company=${section.company}`,
-            section.description && `description=${section.description}`
-          ].filter(Boolean);
-          return `Section: ${section.title || section.url} - ${pieces.join(", ")}`;
+          const content = section.text || section.description || section.role || section.company || "";
+          return `Section: ${section.title || section.url}${content ? ` — ${content}` : ""}`;
         })
       : []),
     ...(Array.isArray(answers.websitePages)
@@ -80,7 +99,7 @@ export function buildChatbotProfile(answers) {
       leadFields,
       websitePages: answers.websitePages || [],
       websiteSections: answers.websiteSections || [],
-      websiteChunks: answers.websiteChunks || [],
+      websiteChunks: cleanChunks,
       websiteTopics: answers.websiteTopics || []
     })
   };
@@ -97,7 +116,10 @@ function buildSystemPrompt(profile) {
       ? `Website pages: ${profile.websitePages.map((page) => `${page.title || page.url}: ${page.summary || ""}`).join(" | ")}.`
       : "Website pages: none provided.",
     Array.isArray(profile.websiteSections) && profile.websiteSections.length
-      ? `Website sections: ${profile.websiteSections.map((section) => `${section.title || section.url}: ${section.role || section.company || section.description || ""}`).join(" | ")}.`
+      ? `Website sections: ${profile.websiteSections.map((section) => {
+          const content = section.text || section.description || section.role || section.company || "";
+          return `${section.title || section.url}: ${content}`;
+        }).join(" | ")}.`
       : "Website sections: none provided.",
     Array.isArray(profile.websiteChunks) && profile.websiteChunks.length
       ? `Website chunks: ${profile.websiteChunks.map((chunk) => `${chunk.title || chunk.url}: ${chunk.text || ""}`).join(" | ")}.`

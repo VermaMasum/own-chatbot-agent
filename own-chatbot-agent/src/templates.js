@@ -54,6 +54,17 @@ export const templates = {
     ],
     knowledgeHints: ["menu", "hours", "location", "delivery policy"]
   },
+  portfolio: {
+    label: "Portfolio / Personal",
+    tone: "friendly, professional, and personable",
+    goals: ["introduce the person", "answer questions about skills and projects", "encourage contact"],
+    questions: [
+      "What is your name and role?",
+      "What skills or projects should visitors know about?",
+      "What should the bot encourage visitors to do (contact, hire, collaborate)?"
+    ],
+    knowledgeHints: ["skills and technologies", "projects and work", "experience and education", "contact info"]
+  },
   generic: {
     label: "General Business",
     tone: "helpful, friendly, and adaptable",
