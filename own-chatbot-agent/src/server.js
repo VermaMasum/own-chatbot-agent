@@ -19,8 +19,13 @@ const publicDir = resolve(rootDir, "public");
 
 await loadEnvFile(resolve(rootDir, ".env"));
 
-const groqBaseUrl = "https://api.groq.com/openai/v1";
-const groqModel = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+// AI provider config — swap by setting env vars, no code change needed
+// Groq (free/dev):   AI_BASE_URL=https://api.groq.com/openai/v1  AI_MODEL=llama-3.1-8b-instant  AI_API_KEY=...
+// OpenAI (prod):     AI_BASE_URL=https://api.openai.com/v1        AI_MODEL=gpt-4o-mini            AI_API_KEY=sk-...
+// OpenRouter (prod): AI_BASE_URL=https://openrouter.ai/api/v1     AI_MODEL=openai/gpt-4o-mini     AI_API_KEY=...
+const aiBaseUrl = process.env.AI_BASE_URL || process.env.GROQ_BASE_URL || "https://api.groq.com/openai/v1";
+const aiModel   = process.env.AI_MODEL    || process.env.GROQ_MODEL    || "llama-3.1-8b-instant";
+const aiApiKey  = process.env.AI_API_KEY  || process.env.GROQ_API_KEY  || "";
 const websiteContextCache = new Map();
 
 const port = Number(process.env.PORT || 3000);
@@ -372,7 +377,7 @@ async function generateChatReply(body) {
     return { reply: "Please type a message first." };
   }
 
-  if (!process.env.GROQ_API_KEY) {
+  if (!aiApiKey) {
     if (directAnswer) {
       return { reply: directAnswer, provider: "retrieval" };
     }
@@ -406,15 +411,15 @@ async function generateChatReply(body) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch(`${groqBaseUrl}/chat/completions`, {
+    const response = await fetch(`${aiBaseUrl}/chat/completions`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        Authorization: `Bearer ${aiApiKey}`,
         "Content-Type": "application/json",
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model: groqModel,
+        model: aiModel,
         messages,
         temperature: 0.4,
         max_tokens: 400,
