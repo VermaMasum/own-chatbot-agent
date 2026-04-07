@@ -9,9 +9,10 @@ const simName = document.getElementById("simName");
 const simMeta = document.getElementById("simMeta");
 const publishButton = document.getElementById("publishButton");
 const publishOutput = document.getElementById("publishOutput");
-const submitButton = form.querySelector('button[type="submit"]');
+const submitButton = document.getElementById("generateBtn");
 
-let backendUrl = "https://own-chatbot-agent.onrender.com";
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+let backendUrl = isLocal ? "" : "https://own-chatbot-agent.onrender.com";
 if (window.location.hostname.includes("github.io")) {
   backendUrl = localStorage.getItem("chatbot_backend_url") || "https://own-chatbot-agent.onrender.com";
   const notice = document.getElementById("backendNotice");
@@ -71,30 +72,6 @@ const localTemplates = {
   }
 };
 
-// Populate dropdown with local data immediately
-if (businessType) {
-  const initialTemplates = Object.entries(localTemplates).map(([key, value]) => ({
-    key,
-    label: value.label
-  }));
-  businessType.innerHTML = initialTemplates
-    .map((item, index) => `<option value="${item.key}" ${index === 0 ? "selected" : ""}>${item.label}</option>`)
-    .join("");
-  syncQuickActions(businessType.value);
-}
-
-// Safe background initialization to sync with backend
-(async function init() {
-  const templatesData = await loadTemplates();
-  if (businessType && templatesData.templates.length > 0) {
-    const currentVal = businessType.value;
-    businessType.innerHTML = templatesData.templates
-      .map((item) => `<option value="${item.key}" ${item.key === currentVal ? "selected" : ""}>${item.label}</option>`)
-      .join("");
-  }
-  await refreshProfile(true);
-})();
-
 const templatePrompts = {
   real_estate: [
     "Do you have 2BHK apartments?",
@@ -128,9 +105,33 @@ const templatePrompts = {
   ]
 };
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  await refreshProfile();
+// Populate dropdown immediately from local data
+if (businessType) {
+  businessType.innerHTML = Object.entries(localTemplates)
+    .map(([key, value], index) => `<option value="${key}" ${index === 0 ? "selected" : ""}>${value.label}</option>`)
+    .join("");
+  syncQuickActions(businessType.value);
+}
+
+// Sync dropdown with backend templates in background (no profile generation)
+(async function syncTemplates() {
+  try {
+    const data = await callApi("/api/templates");
+    if (!data || !data.templates || !data.templates.length) return;
+    const currentVal = businessType.value;
+    businessType.innerHTML = data.templates
+      .map((item) => `<option value="${item.key}" ${item.key === currentVal ? "selected" : ""}>${item.label}</option>`)
+      .join("");
+  } catch {
+    // keep local templates
+  }
+})();
+
+// Show initial ready state — no auto-generation, wait for user to fill form
+showReadyState();
+
+submitButton.addEventListener("click", async () => {
+  await generateProfile();
 });
 
 if (publishButton) {
@@ -151,22 +152,12 @@ if (publishButton) {
         })
       });
 
-      if (!data) {
-        throw new Error("Publish request failed");
-      }
+      if (!data) throw new Error("Publish request failed");
 
       currentBot = data;
-      currentProfile = {
-        ...currentProfile,
-        botId: data.id,
-        publishUrl: data.publicUrl,
-        embedUrl: data.embedUrl
-      };
+      currentProfile = { ...currentProfile, botId: data.id, publishUrl: data.publicUrl, embedUrl: data.embedUrl };
 
-      if (output) {
-        output.textContent = JSON.stringify(currentProfile, null, 2);
-      }
-
+      if (output) output.textContent = JSON.stringify(currentProfile, null, 2);
       renderPublishOutput(data);
     } catch (error) {
       publishOutput.textContent = `Could not publish chatbot: ${error.message}`;
@@ -180,7 +171,12 @@ if (publishButton) {
 chatForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const message = chatInput.value.trim();
-  if (!message || !currentProfile) return;
+  if (!message) return;
+
+  if (!currentProfile) {
+    addMessage("system", "Please generate a chatbot profile first using the form on the left.");
+    return;
+  }
 
   chatInput.value = "";
   addMessage("user", message);
@@ -189,33 +185,22 @@ chatForm.addEventListener("submit", async (event) => {
   const typingId = addTyping();
 
   try {
-    const data =
-      (await callApi("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message,
-          profile: currentProfile,
-          conversation
-        })
-      })) || {
-        reply: generateLocalReply(message, currentProfile, conversation),
-        provider: "static"
-      };
+    const data = (await callApi("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, profile: currentProfile, conversation })
+    })) || {
+      reply: generateLocalReply(message, currentProfile, conversation),
+      provider: "static"
+    };
 
     removeTyping(typingId);
-
     const reply = data.reply || "I could not generate a response right now.";
-    if (data.error) {
-      simMeta.textContent = `${currentProfile.businessType} | ${currentProfile.tone} | ${data.provider || "fallback"}`;
-    }
     addMessage("bot", reply);
     conversation.push({ role: "assistant", content: reply });
   } catch {
     removeTyping(typingId);
-    const fallback = "I could not reach the chatbot API right now. Please check the server and Groq key.";
-    addMessage("bot", fallback);
-    conversation.push({ role: "assistant", content: fallback });
+    addMessage("bot", "I could not reach the chatbot API right now. Please check the server and Groq key.");
   }
 
   scrollChatToBottom();
@@ -232,50 +217,71 @@ businessType.addEventListener("change", () => {
   syncQuickActions(businessType.value);
 });
 
-await refreshProfile(true);
+// ─── Core profile generation ──────────────────────────────────────────────────
 
-async function refreshProfile(isInitial = false) {
+async function generateProfile() {
   const formData = new FormData(form);
   const payload = Object.fromEntries(formData.entries());
+  const hasWebsiteUrl = String(payload.websiteUrl || "").trim().length > 0;
 
+  // Lock button and show progress
   submitButton.disabled = true;
-  submitButton.textContent = isInitial ? "Loading chatbot profile..." : "Updating chatbot profile...";
-  output.textContent = "Building chatbot profile from your website...";
-  simMeta.textContent = "Reading website and generating profile...";
+  submitButton.textContent = hasWebsiteUrl ? "Scraping website..." : "Generating profile...";
+  output.textContent = hasWebsiteUrl
+    ? `Reading ${payload.websiteUrl} and building your chatbot profile...`
+    : "Building chatbot profile from your inputs...";
+  simMeta.textContent = hasWebsiteUrl ? "Fetching website content..." : "Generating...";
+
+  // Show progress in chat while waiting
+  chatWindow.innerHTML = "";
+  addMessage("system", hasWebsiteUrl
+    ? `Reading ${payload.websiteUrl}... this may take up to 15 seconds.`
+    : "Generating your chatbot profile...");
 
   try {
-    const data =
-      (await callApi("/api/build", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...payload,
-          forceRefresh: true
-        })
-      })) || buildLocalProfile(payload);
-
-    if (!Array.isArray(data.websiteChunks) || data.websiteChunks.length === 0) {
-      simMeta.textContent = `${data.businessType} | ${data.tone} | ${data.provider === "static" ? "demo mode" : "no readable website content found"
-        }`;
-    }
+    const data = (await callApi("/api/build", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, forceRefresh: true })
+    })) || buildLocalProfile(payload);
 
     currentProfile = data;
     currentBot = null;
+
+    // Show generated config
     output.textContent = JSON.stringify(currentProfile, null, 2);
 
+    // Update simulator header
     simName.textContent = currentProfile.projectName || "Website Assistant";
-    simMeta.textContent = `${currentProfile.businessType} | ${currentProfile.tone}${currentProfile.provider === "static" ? " | demo mode" : ""}`;
 
-    conversation = [];
-    renderIntro(isInitial);
+    const hasWebContent = Array.isArray(data.websiteChunks) && data.websiteChunks.length > 0;
+    const sourceLabel = data.provider === "static"
+      ? "demo mode — no website scraped"
+      : hasWebContent
+        ? `${data.websitePages?.length || 0} pages scraped`
+        : "profile generated, no web content found";
+
+    simMeta.textContent = `${currentProfile.businessType} | ${currentProfile.tone} | ${sourceLabel}`;
+
+    // Show welcome in chat
+    chatWindow.innerHTML = "";
+    const welcome = `Hi, I'm ${currentProfile.projectName || "your chatbot"}. Ask me anything about the business!`;
+    addMessage("bot", welcome);
+    conversation = [{ role: "assistant", content: welcome }];
+
+    if (!hasWebContent && hasWebsiteUrl) {
+      addMessage("system", "Note: I could not read the website content. I am using your form inputs to answer questions.");
+    }
+
     syncQuickActions(payload.businessType);
     renderPublishPrompt();
+    scrollChatToBottom();
   } catch (error) {
     currentProfile = null;
-    currentBot = null;
-    output.textContent = `Could not generate chatbot profile.\n\n${error.message}`;
-    simMeta.textContent = "Could not read the website";
-    renderPublishPrompt(error.message);
+    output.textContent = `Error: ${error.message}`;
+    simMeta.textContent = "Failed to generate profile";
+    chatWindow.innerHTML = "";
+    addMessage("system", `Could not generate profile: ${error.message}`);
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = "Generate chatbot profile";
@@ -286,23 +292,18 @@ async function refreshProfile(isInitial = false) {
   }
 }
 
-function renderIntro(isInitial = false) {
+function showReadyState() {
+  output.textContent = "Fill in the form and click \"Generate chatbot profile\" to get started.";
+  simName.textContent = "Website Assistant";
+  simMeta.textContent = "Ready — waiting for profile";
   chatWindow.innerHTML = "";
-
-  const welcome = currentProfile?.projectName
-    ? `Hi, I'm ${currentProfile.projectName}. Ask me anything about the business and I will answer like the live chatbot.`
-    : "Hi, I'm your chatbot assistant. Ask me anything about the business.";
-
-  addMessage("bot", welcome);
-  conversation.push({ role: "assistant", content: welcome });
-
-  if (isInitial) {
-    const hint = "This is a live simulator. Type a question below and I will answer using Groq when configured.";
-    addMessage("system", hint);
-  }
-
-  scrollChatToBottom();
+  addMessage("bot", "Hi! Fill in your website URL and business details on the left, then click Generate chatbot profile.");
+  addMessage("system", "Your chatbot will be trained on your website content and ready to answer questions here.");
+  renderPublishPrompt();
+  if (publishButton) publishButton.disabled = true;
 }
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
 
 function syncQuickActions(type) {
   const prompts = templatePrompts[type] || templatePrompts.generic;
@@ -314,41 +315,31 @@ function syncQuickActions(type) {
 function renderPublishPrompt(message = "") {
   if (!publishOutput) return;
   publishOutput.textContent = message
-    ? `Publish is ready once the profile loads. ${message}`
-    : "Generate a chatbot profile first, then publish it to get a live URL and install snippet.";
+    ? `Error: ${message}`
+    : "Generate a chatbot profile first, then publish it to get a live URL and embed code.";
 }
 
 function renderPublishOutput(bot) {
   if (!publishOutput) return;
-
   const shareUrl = bot.publicUrl || bot.shareUrl || "";
   const embedScript = bot.embedScript || "";
   const embedIframe = bot.embedIframe || "";
-
   publishOutput.innerHTML = `
     <div class="publish-summary">
       <div><strong>Bot ID:</strong> <code>${escapeHtml(bot.id || "")}</code></div>
       <div><strong>Share URL:</strong> <a href="${escapeHtml(shareUrl)}" target="_blank" rel="noreferrer">${escapeHtml(shareUrl)}</a></div>
     </div>
-    <label class="snippet-label">
-      Embed script
-      <textarea readonly rows="3">${escapeHtml(embedScript)}</textarea>
-    </label>
-    <label class="snippet-label">
-      Embed iframe
-      <textarea readonly rows="4">${escapeHtml(embedIframe)}</textarea>
-    </label>
+    <label class="snippet-label">Embed script<textarea readonly rows="3">${escapeHtml(embedScript)}</textarea></label>
+    <label class="snippet-label">Embed iframe<textarea readonly rows="4">${escapeHtml(embedIframe)}</textarea></label>
   `;
 }
 
 function addMessage(role, text) {
   const row = document.createElement("div");
   row.className = `message ${role}`;
-
   const bubble = document.createElement("div");
   bubble.className = "bubble";
   bubble.textContent = text;
-
   row.appendChild(bubble);
   chatWindow.appendChild(row);
   scrollChatToBottom();
@@ -359,11 +350,9 @@ function addTyping() {
   const row = document.createElement("div");
   row.className = "message bot";
   row.dataset.typingId = id;
-
   const bubble = document.createElement("div");
   bubble.className = "bubble";
   bubble.textContent = "Typing...";
-
   row.appendChild(bubble);
   chatWindow.appendChild(row);
   scrollChatToBottom();
@@ -377,19 +366,15 @@ function removeTyping(id) {
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (char) =>
-    ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[char]
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]
   );
 }
 
 function scrollChatToBottom() {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
+
+// ─── API helpers ──────────────────────────────────────────────────────────────
 
 async function loadTemplates() {
   try {
@@ -398,10 +383,7 @@ async function loadTemplates() {
     return data;
   } catch {
     return {
-      templates: Object.entries(localTemplates).map(([key, value]) => ({
-        key,
-        label: value.label
-      }))
+      templates: Object.entries(localTemplates).map(([key, value]) => ({ key, label: value.label }))
     };
   }
 }
@@ -410,7 +392,7 @@ async function callApi(path, options) {
   try {
     const fullPath = backendUrl ? `${backendUrl.replace(/\/$/, "")}${path}` : path;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
     const response = await fetch(fullPath, { ...options, signal: controller.signal });
     clearTimeout(timeoutId);
     const data = await response.json();
@@ -419,10 +401,12 @@ async function callApi(path, options) {
     }
     return data;
   } catch (error) {
-    console.error("API Call failed:", error);
+    console.error("API Call failed:", error.message);
     return null;
   }
 }
+
+// ─── Local fallback profile ───────────────────────────────────────────────────
 
 function buildLocalProfile(payload) {
   const template = localTemplates[payload.businessType] || localTemplates.generic;
@@ -430,8 +414,6 @@ function buildLocalProfile(payload) {
   const goals = compact([payload.mainGoal, ...template.goals]);
   const knowledgeSources = compact([
     payload.websiteUrl && `Website: ${payload.websiteUrl}`,
-    payload.websiteTitle && `Website title: ${payload.websiteTitle}`,
-    payload.websiteSummary && `Website summary: ${payload.websiteSummary}`,
     payload.uploadedDocs && `Uploaded docs: ${payload.uploadedDocs}`,
     ...template.knowledgeHints.map((hint) => `Business knowledge: ${hint}`)
   ]);
@@ -445,13 +427,12 @@ function buildLocalProfile(payload) {
     "The user requests a human representative.",
     "The bot is uncertain about the answer."
   ]);
-
   return {
     projectName,
     businessType: template.label,
     websiteUrl: payload.websiteUrl || "",
-    websiteTitle: payload.websiteTitle || "",
-    websiteSummary: payload.websiteSummary || "",
+    websiteTitle: "",
+    websiteSummary: "",
     websitePages: [],
     websiteSections: [],
     websiteChunks: [],
@@ -462,67 +443,32 @@ function buildLocalProfile(payload) {
     knowledgeSources,
     leadCaptureFields,
     handoffConditions,
-    allowedTopics: compact([
-      payload.allowedTopics,
-      "business services",
-      "pricing or packages",
-      "basic support"
-    ]),
-    blockedTopics: compact([
-      payload.blockedTopics,
-      "legal advice",
-      "medical diagnosis",
-      "financial guarantees"
-    ]),
-    prompt: buildLocalPrompt({
-      projectName,
-      businessType: template.label,
-      tone: payload.tone || template.tone,
-      goals,
-      knowledgeSources,
-      handoffConditions,
-      leadFields: leadCaptureFields
-    }),
+    allowedTopics: compact([payload.allowedTopics, "business services", "pricing or packages", "basic support"]),
+    blockedTopics: compact([payload.blockedTopics, "legal advice", "medical diagnosis", "financial guarantees"]),
+    prompt: [
+      `You are the AI chatbot for ${projectName}.`,
+      `Business type: ${template.label}.`,
+      `Tone: ${payload.tone || template.tone}.`,
+      `Primary goals: ${goals.join(", ")}.`,
+      `Knowledge sources: ${knowledgeSources.join(", ")}.`,
+      `Capture lead fields only when useful: ${leadCaptureFields.join(", ") || "none"}.`,
+      `Hand off to a human when: ${handoffConditions.join(" | ")}.`,
+      "Be accurate, concise, and friendly.",
+      "If a question cannot be answered confidently, say so and offer a handoff."
+    ].join("\n"),
     provider: "static"
   };
-}
-
-function buildLocalPrompt(profile) {
-  return [
-    `You are the AI chatbot for ${profile.projectName}.`,
-    `Business type: ${profile.businessType}.`,
-    `Tone: ${profile.tone}.`,
-    `Primary goals: ${profile.goals.join(", ")}.`,
-    `Knowledge sources: ${profile.knowledgeSources.join(", ")}.`,
-    `Capture lead fields only when useful: ${profile.leadFields.join(", ") || "none"}.`,
-    `Hand off to a human when: ${profile.handoffConditions.join(" | ")}.`,
-    "Be accurate, concise, and friendly.",
-    "If a question cannot be answered confidently, say so and offer a handoff.",
-    "Adapt the reply to the user's intent instead of sounding generic."
-  ].join("\n");
 }
 
 function generateLocalReply(message, profile, history) {
   const text = String(message || "").toLowerCase();
   const name = profile?.projectName || "this chatbot";
-
-  if (text.includes("price") || text.includes("pricing")) {
-    return `${name} can help with pricing guidance, but exact numbers depend on the business setup.`;
-  }
-
-  if (text.includes("hello") || text.includes("hi")) {
-    return `Hi, I’m ${name}. How can I help today?`;
-  }
-
-  if (text.includes("contact") || text.includes("email") || text.includes("phone")) {
-    return `I can help route you to the right contact details for ${profile?.businessType || "this business"}.`;
-  }
-
-  const lastUserMessage = [...history].reverse().find((item) => item.role === "user")?.content;
-  return `I’m in demo mode right now, so I can simulate helpful replies for ${profile?.businessType || "this business"
-    }. Ask me about ${profile?.goals?.[0] || "services"} or "${lastUserMessage || "your question"}".`;
+  if (text.includes("price") || text.includes("pricing")) return `${name} can help with pricing guidance — ask a specific question for details.`;
+  if (text.includes("hello") || text.includes("hi")) return `Hi, I'm ${name}. How can I help today?`;
+  if (text.includes("contact") || text.includes("email") || text.includes("phone")) return `I can help route you to the right contact details for ${profile?.businessType || "this business"}.`;
+  return `I'm your AI assistant for ${profile?.businessType || "this business"}. Ask me about ${profile?.goals?.[0] || "our services"}.`;
 }
 
 function compact(values) {
-  return [...new Set(values.flat ? values.flat().filter(Boolean) : values.filter(Boolean))];
+  return [...new Set((values.flat ? values.flat() : values).filter(Boolean))];
 }
